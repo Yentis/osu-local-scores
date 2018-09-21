@@ -1,9 +1,6 @@
 const osuReplayParser = require('osureplayparser');
 const fs = require('fs');
-const processed = require('./processedReplays.json');
-const settingsFile = require('./settings.json');
 const dataPath = '/Data/r/';
-const readline = require('readline');
 const https = require('https');
 const {app, BrowserWindow, Menu, ipcMain} =  require('electron');
 const url = require('url');
@@ -20,7 +17,7 @@ function getReplayData(path){
 
 function getRelevantData(replay){
     return new Promise(resolve => {
-        let accuracy = (((replay.number_300s) * 300 + (replay.number_100s) * 100 + (replay.number_50s) * 50)/((replay.number_300s+replay.number_100s+replay.number_50s+replay.misses)*300));
+        let accuracy = (((replay.number_300s) * 300 + (replay.number_100s) * 100 + (replay.number_50s) * 50)/((replay.number_300s+replay.number_100s+replay.number_50s+replay.misses)*300) * 100);
 
         https.get('https://osu.ppy.sh/api/get_beatmaps?k=' + settings.apikey + '&h=' + replay.beatmapMD5, (resp) => {
             let data = '';
@@ -45,7 +42,8 @@ function getRelevantData(replay){
                     max_combo: replay.max_combo,
                     timestamp: replay.timestamp,
                     mods: replay.mods,
-                    mode: replay.gameMode
+                    mode: replay.gameMode,
+                    grade: calcGrade(replay)
                 });
             });
 
@@ -96,7 +94,7 @@ async function processReplays(token){
                 }).then(function () {
                     json = JSON.stringify(processedReplays);
 
-                    fs.writeFile('processedReplays.json', json, 'utf8', function () {
+                    fs.writeFile('assets/json/processedReplays.json', json, 'utf8', function () {
                         resolve('Your replays have been processed successfully.');
                     }); // write it back
                 }).catch(function () {
@@ -109,12 +107,12 @@ async function processReplays(token){
     });
 }
 
-fs.readFile('processedReplays.json', 'utf8', function readFileCallback(err, data){
+fs.readFile('assets/json/processedReplays.json', 'utf8', function readFileCallback(err, data){
     if (err){
         console.log(err);
     } else {
         processedReplays = JSON.parse(data);
-        fs.readFile('settings.json', 'utf8', function readFileCallback(err, data){
+        fs.readFile('assets/json/settings.json', 'utf8', function readFileCallback(err, data){
             if (err){
                 console.log(err);
             } else {
@@ -161,7 +159,6 @@ function makeReplayList(){
                 if(!replayList[beatmapid] || (replayList[beatmapid] && replayList[beatmapid].score < currentReplay.score)) {
                     replayList[beatmapid] = currentReplay;
                     replayList[beatmapid]['name'] = currentReplay.beatmapdata.artist + ' - ' + currentReplay.beatmapdata.title + ' [' + currentReplay.beatmapdata.version + ']';
-                    replayList[beatmapid]['grade'] = calcGrade(currentReplay);
                 }
             }
         }
@@ -175,13 +172,13 @@ function calcGrade(replay){
     let percent300 = replay.number_300s / amountOfNotes;
     let percent50 =  replay.number_50s / amountOfNotes;
 
-    if(replay.accuracy == 1) {
+    if(replay.accuracy === 100) {
         return 5;
-    } else if(percent300 > 0.9 && percent50 < 0.01 && replay.misses == 0) {
+    } else if(percent300 > 0.9 && percent50 < 0.01 && replay.misses === 0) {
         return 4;
-    } else if((percent300 > 0.8 && replay.misses == 0) || percent300 > 0.9) {
+    } else if((percent300 > 0.8 && replay.misses === 0) || percent300 > 0.9) {
         return 3;
-    } else if((percent300 > 0.7 && replay.misses == 0) || percent300 > 0.8) {
+    } else if((percent300 > 0.7 && replay.misses === 0) || percent300 > 0.8) {
         return 2;
     } else if(percent300 > 0.6) {
         return 1;
@@ -246,8 +243,8 @@ ipcMain.on('replays:cancel', function (e) {
 
 ipcMain.on('settings', function (e, newSettings) {
     settings = newSettings;
-    fs.writeFile('settings.json', JSON.stringify(newSettings), 'utf8', function () {
-        settingsWindow.close();
+    fs.writeFile('assets/json/settings.json', JSON.stringify(newSettings), 'utf8', function () {
+        settingsWindow.webContents.send('unlock', false);
     });
 });
 

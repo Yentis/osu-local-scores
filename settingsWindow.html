@@ -11,22 +11,6 @@
 
     <input type="submit" id="save" value="Save Settings">
 </form>
-<script>
-    const electron = require('electron');
-    const {ipcRenderer} = electron;
-
-    document.getElementById('settings').addEventListener('submit', function (e) {
-        e.preventDefault();
-        let osuPath = document.getElementById('osuPath').value;
-        let apikey = document.getElementById('apikey').value;
-
-        ipcRenderer.send('settings', {osuPath: osuPath, apikey: apikey});
-    });
-
-    ipcRenderer.on('settings', function (e, settings) {
-        document.getElementById('osuPath').value = settings.osuPath;
-        document.getElementById('apikey').value = settings.apikey;
-    });
-</script>
+<script src="assets/js/settingsWindow.js"></script>
 </body>
 </html>

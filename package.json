@@ -1,0 +1,18 @@
+{
+  "name": "osu-local-scores",
+  "version": "1.0.0",
+  "description": "read local scores",
+  "main": "main.js",
+  "author": "Yentis",
+  "dependencies": {
+    "echo-js": "^1.7.3",
+    "jquery": "^3.3.1",
+    "osureplayparser": "^1.0.1"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^2.0.10"
+  }
+}

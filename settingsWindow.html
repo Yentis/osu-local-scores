@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+</head>
+<body>
+<form id="settings">
+    <label for="osuPath">osu! Folder</label><input type="text" id="osuPath">
+    <label for="apikey">Api Key</label><input type="text" id="apikey">
+
+    <input type="submit" id="save" value="Save Settings">
+</form>
+<script>
+    const electron = require('electron');
+    const {ipcRenderer} = electron;
+
+    document.getElementById('settings').addEventListener('submit', function (e) {
+        e.preventDefault();
+        let osuPath = document.getElementById('osuPath').value;
+        let apikey = document.getElementById('apikey').value;
+
+        ipcRenderer.send('settings', {osuPath: osuPath, apikey: apikey});
+    });
+
+    ipcRenderer.on('settings', function (e, settings) {
+        document.getElementById('osuPath').value = settings.osuPath;
+        document.getElementById('apikey').value = settings.apikey;
+    });
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 window.$ = window.jQuery = require('jquery');
 const {ipcRenderer} = require('electron');
+const baseShow = 100;
 const grade = {
     5: 'SS',
     4: 'S',
@@ -51,9 +52,12 @@ let filters = {
     missesMax: '',
     gradeMin: 'D',
     gradeMax: 'SS',
-    gamemode: 0,
+    gamemode: '',
     beatmap_id: '',
     mapName: '',
+    dateMin: '',
+    dateMax: '',
+    amountToShow: baseShow,
     orderType: 'name',
     orderDirection: 'asc'
 };
@@ -82,7 +86,7 @@ function sortList(){
         } else if(filters.orderType === 'beatmap_id') {
             return a.beatmapdata[filters.orderType] - b.beatmapdata[filters.orderType];
         } else if(filters.orderType === 'timestamp') {
-            return new Date(a[filters.orderType]) - new Date(b[filters.orderType]);
+            return getDate(a[filters.orderType]) - getDate(b[filters.orderType]);
         } else {
             return a[filters.orderType] - b[filters.orderType];
         }
@@ -92,7 +96,7 @@ function sortList(){
 function applyFilters(replay, regexName, regex_id){
     return !!((replay.mods & mods.ScoreV2) !== mods.ScoreV2
         && replay.grade >= gradeToIndex(filters.gradeMin)
-        && replay.grade <= gradeToIndex(filters.gradeMax)
+        && (filters.gradeMax === '' || replay.grade <= gradeToIndex(filters.gradeMax))
         && (regex_id == null || replay.beatmapdata.beatmap_id.match(regex_id))
         && (regexName == null || replay.name.toLowerCase().match(regexName))
         && replay.score >= filters.scoreMin
@@ -101,12 +105,14 @@ function applyFilters(replay, regexName, regex_id){
         && (filters.accuracyMax === '' || replay.accuracy <= filters.accuracyMax)
         && replay.misses >= filters.missesMin
         && (filters.missesMax === '' || replay.misses <= filters.missesMax)
-        && replay.mode === filters.gamemode);
+        && (filters.gamemode === '' || replay.mode === filters.gamemode)
+        && (filters.dateMin === '' || (getDate(replay.timestamp) - new Date(filters.dateMin)) >= 0)
+        && (filters.dateMax === '' || (getDate(replay.timestamp) - new Date(filters.dateMax)) <= 0));
 }
 
 function addHtml(replay) {
     let html = '';
-    html += '<tr class="tableContent" style="border: 2px solid;">';
+    html += '<tr hidden style="border: 2px solid;">';
     html += '<td><img data-echo="http://b.ppy.sh/thumb/' + replay.beatmapdata.beatmapset_id + '.jpg" height="60"></td>';
     html += '<td><a href="osu://b/' + replay.beatmapdata.beatmap_id + '">' + replay.name + '</a></td>';
     html += '<td>' + numberWithCommas(replay.score) + '</td>';
@@ -115,7 +121,7 @@ function addHtml(replay) {
     html += '<td>' + replay.misses + '</td>';
     html += '<td>' + replay.mode + '</td>';
     html += '<td>' + replay.beatmapdata.beatmap_id + '</td>';
-    html += '<td style="width: 100px">' + new Date(replay.timestamp).toLocaleDateString('nl-NL') + '</td>';
+    html += '<td style="width: 100px">' + replay.timestamp + '</td>';
     html += '</tr>';
     return html;
 }
@@ -123,6 +129,7 @@ function addHtml(replay) {
 function updateReplayList(){
     let html = '';
 
+    filters.amountToShow = baseShow;
     sortList();
 
     replayList.forEach(function (replay) {
@@ -141,11 +148,30 @@ function updateReplayList(){
         }
     });
 
-    clearList();
-    let replayTable = $('#replayTable');
-    replayTable.append(html);
+    $('tr:not(.originalTable)').remove();
+    $('#replayTable').append(html);
+    unhideElements();
 
     echo.render();
+}
+
+function unhideElements(){
+    let replayTable = $('#replayTable');
+    let origTableLength = $('.originalTable').length;
+    let replayElements = replayTable[0].children[0].children;
+    let showAmount = Math.min(filters.amountToShow, replayElements.length - origTableLength);
+
+    $('#showmore').remove();
+    for(let i = 0; i < origTableLength + showAmount; i++) {
+        let elem = replayElements[i];
+        elem.removeAttribute('hidden');
+    }
+
+    if(filters.amountToShow < replayElements.length) {
+        replayTable.append('<a id="showmore" href="#">Show more</a>');
+    }
+
+    $('#showamount').html('Showing ' + showAmount + ' of ' + (replayElements.length - origTableLength));
 }
 
 function gradeToIndex(letter){
@@ -160,15 +186,24 @@ function gradeToIndex(letter){
     return null;
 }
 
-function clearList(){
-    let paras = document.getElementsByClassName('tableContent');
+function getDate(dateString){
+    let dateArray = dateString.split('-');
 
-    while(paras[0]){
-        paras[0].parentNode.removeChild((paras[0]));
-    }
+    return new Date(dateArray[2], dateArray[1]-1, dateArray[0]);
 }
 
-$(document).on('change', 'input', function () {
+$(document).on('click', '#showmore', function (e) {
+    e.preventDefault();
+    filters.amountToShow += 100;
+    unhideElements();
+});
+
+$(document).on('keyup', 'input:not(#dateMin, #dateMax)', function () {
+    filters[this.id] = this.value;
+    updateReplayList();
+});
+
+$(document).on('change', '#dateMin, #dateMax', function () {
     filters[this.id] = this.value;
     updateReplayList();
 });

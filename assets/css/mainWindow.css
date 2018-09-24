@@ -9,3 +9,13 @@ tr, td, input {
 input {
     border: none;
 }
+
+.filter {
+    border: solid 2px deepskyblue;
+}
+
+#showmore {
+    position: absolute;
+    width: 95%;
+    text-align: center;
+}

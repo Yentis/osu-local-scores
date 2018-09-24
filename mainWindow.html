@@ -8,7 +8,7 @@
 <body>
 <p id="message"></p>
 <table id="replayTable">
-    <tr>
+    <tr class="originalTable">
         <td><label>Order by
             <select id="orderType">
                 <option value="name">Name</option>
@@ -22,30 +22,32 @@
             </select>
         </label></td>
         <td></td>
-        <td>≥<input type="number" id="scoreMin" placeholder="Min Score"></td>
-        <td>≥<input type="text" id="gradeMin" placeholder="Min Grade"></td>
-        <td>≥<input type="number" id="accuracyMin" placeholder="Min Acc"></td>
-        <td>≥<input type="number" id="missesMin" placeholder="Min Misses"></td>
+        <td><label for="scoreMin">≥</label><input type="number" class="filter" id="scoreMin" placeholder="Min Score"></td>
+        <td><label for="gradeMin">≥</label><input type="text" class="filter" id="gradeMin" placeholder="Min Grade"></td>
+        <td><label for="accuracyMin">≥</label><input type="number" class="filter" id="accuracyMin" placeholder="Min Acc"></td>
+        <td><label for="missesMin">≥</label><input type="number" class="filter" id="missesMin" placeholder="Min Misses"></td>
         <td></td>
+        <td></td>
+        <td><label for="dateMin">≥</label><input type="date" class="filter" id="dateMin"></td>
     </tr>
-    <tr>
+    <tr class="originalTable">
         <td>
             <select id="orderDirection">
                 <option value="asc">Asc</option>
                 <option value="desc">Desc</option>
             </select>
         </td>
-        <td><input type="text" id="mapName" placeholder="Search"></td>
-        <td>≤<input type="number" id="scoreMax" placeholder="Max Score"></td>
-        <td>≤<input type="text" id="gradeMax" placeholder="Max Grade"></td>
-        <td>≤<input type="number" id="accuracyMax" placeholder="Max Acc"></td>
-        <td>≤<input type="number" id="missesMax" placeholder="Max Misses"></td>
-        <td><input type="number" id="gamemode" placeholder="Gamemode"></td>
-        <td><input type="number" id="beatmap_id" placeholder="Beatmap ID"></td>
-        <td></td>
+        <td><input type="text" class="filter" id="mapName" placeholder="Search"></td>
+        <td><label for="scoreMax">≤</label><input type="number" class="filter" id="scoreMax" placeholder="Max Score"></td>
+        <td><label for="gradeMax">≤</label><input type="text" class="filter" id="gradeMax" placeholder="Max Grade"></td>
+        <td><label for="accuracyMax">≤</label><input type="number" class="filter" id="accuracyMax" placeholder="Max Acc"></td>
+        <td><label for="missesMax">≤</label><input type="number" class="filter" id="missesMax" placeholder="Max Misses"></td>
+        <td><input type="number" class="filter" id="gamemode" placeholder="Gamemode"></td>
+        <td><input type="number" class="filter" id="beatmap_id" placeholder="Beatmap ID"></td>
+        <td><label for="dateMax">≤</label><input type="date" class="filter" id="dateMax"></td>
     </tr>
-    <tr>
-        <th></th>
+    <tr class="originalTable">
+        <th id="showamount"></th>
         <th>Name</th>
         <th>Score</th>
         <th>Grade</th>

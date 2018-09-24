@@ -7,10 +7,12 @@
 <body>
 <form id="settings">
     <label for="osuPath">osu! Folder</label><input type="text" id="osuPath">
-    <label for="apikey">Api Key</label><input type="text" id="apikey">
+    <input type="button" id="btn-chooseFolder" value="Choose Folder" /> <br>
+    <label for="apikey"><a href="#" id="apilink">Api Key</a></label><input type="text" id="apikey">
 
     <input type="submit" id="save" value="Save Settings">
 </form>
+<p id="message"></p>
 <script src="assets/js/settingsWindow.js"></script>
 </body>
 </html>

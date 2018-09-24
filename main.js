@@ -5,7 +5,23 @@ const https = require('https');
 const {app, BrowserWindow, Menu, ipcMain} =  require('electron');
 const url = require('url');
 const path = require('path');
+const jsonPath = path.resolve(__dirname, 'assets', 'json');
+const csharpPath = path.resolve(__dirname, 'assets', 'csharp');
+const Store = require('electron-store');
+const store = new Store();
+const edge = require('electron-edge-js');
 let processedReplays, settings;
+
+process.env.NODE_ENV = 'production';
+
+let test = edge.func({
+    source: csharpPath + '/ScoresDb.cs',
+    references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll']
+});
+
+test('', function (error, result) {
+    console.log(result);
+});
 
 function getReplayData(path){
     let fullPath = settings.osuPath + dataPath + path;
@@ -30,6 +46,11 @@ function getRelevantData(replay){
             // The whole response has been received. Print out the result.
             resp.on('end', () => {
                 let beatmapdata = JSON.parse(data)[0];
+                let name;
+
+                if(beatmapdata) {
+                    name = beatmapdata.artist + ' - ' + beatmapdata.title + ' [' + beatmapdata.version + ']';
+                }
 
                 resolve({
                     beatmapdata: beatmapdata,
@@ -40,10 +61,11 @@ function getRelevantData(replay){
                     misses: replay.misses,
                     score: replay.score,
                     max_combo: replay.max_combo,
-                    timestamp: replay.timestamp,
+                    timestamp: new Date(replay.timestamp).toLocaleDateString('nl-NL'),
                     mods: replay.mods,
                     mode: replay.gameMode,
-                    grade: calcGrade(replay)
+                    grade: calcGrade(replay),
+                    name: name
                 });
             });
 
@@ -70,12 +92,12 @@ async function processReplays(token){
 
         fs.readdir(settings.osuPath + dataPath, (err, files) => {
             const start = async () => {
-                let promise = asyncForEach(files, async (file, index) => {
+                asyncForEach(files, async (file, index) => {
                     if(cancelled) {
                         throw 'Cancelled';
                     }
 
-                    if(file.endsWith('osr') && !processedReplays[file]) {
+                    if(isUnprocessed(file)) {
                         let replayData = await getReplayData(file);
 
                         if(replayData) {
@@ -92,11 +114,8 @@ async function processReplays(token){
                         }
                     }
                 }).then(function () {
-                    json = JSON.stringify(processedReplays);
-
-                    fs.writeFile('assets/json/processedReplays.json', json, 'utf8', function () {
-                        resolve('Your replays have been processed successfully.');
-                    }); // write it back
+                    store.set('processedReplays', processedReplays);
+                    resolve('Your replays have been processed successfully.');
                 }).catch(function () {
                     resolve('Replay processing has been cancelled.');
                 });
@@ -107,22 +126,29 @@ async function processReplays(token){
     });
 }
 
-fs.readFile('assets/json/processedReplays.json', 'utf8', function readFileCallback(err, data){
-    if (err){
-        console.log(err);
-    } else {
-        processedReplays = JSON.parse(data);
-        fs.readFile('assets/json/settings.json', 'utf8', function readFileCallback(err, data){
-            if (err){
-                console.log(err);
-            } else {
-                settings = JSON.parse(data);
-            }
-        });
+function isUnprocessed(file){
+    return !!(file.endsWith('osr') && !processedReplays[file]);
+}
+
+function getData(){
+    processedReplays = store.get('processedReplays');
+    settings = store.get('settings');
+
+    if(!processedReplays) {
+        store.set('processedReplays', {});
+        processedReplays = {};
     }
-});
+
+    if(!settings) {
+        store.set('settings', {});
+        settings = {};
+    }
+}
+
+getData();
 
 let mainWindow, processReplayWindow, settingsWindow;
+let token = {};
 
 app.on('ready', function () {
     mainWindow = new BrowserWindow({
@@ -147,24 +173,47 @@ app.on('ready', function () {
 });
 
 function makeReplayList(){
-    let replayList = [];
+    if(Object.keys(processedReplays).length === 0 && processedReplays.constructor === Object) {
+        mainWindow.webContents.send('message', 'No replays found, please process them first. (File -> Process Replays)');
+    } else {
+        let replayList = [];
 
-    for (let key in processedReplays) {
-        if (processedReplays.hasOwnProperty(key)) {
-            let currentReplay = processedReplays[key];
+        (async () => {
+            if(await isMissingReplays()) {
+                mainWindow.webContents.send('message', 'Unprocessed replays found, please process them. (File -> Process Replays)');
+            }
 
-            if(currentReplay.beatmapdata) {
-                let beatmapid = currentReplay.beatmapdata.beatmap_id;
+            for (let key in processedReplays) {
+                if (processedReplays.hasOwnProperty(key)) {
+                    let currentReplay = processedReplays[key];
 
-                if(!replayList[beatmapid] || (replayList[beatmapid] && replayList[beatmapid].score < currentReplay.score)) {
-                    replayList[beatmapid] = currentReplay;
-                    replayList[beatmapid]['name'] = currentReplay.beatmapdata.artist + ' - ' + currentReplay.beatmapdata.title + ' [' + currentReplay.beatmapdata.version + ']';
+                    if(currentReplay.beatmapdata) {
+                        let beatmapid = currentReplay.beatmapdata.beatmap_id;
+
+                        if(!replayList[beatmapid] || (replayList[beatmapid] && replayList[beatmapid].score < currentReplay.score)) {
+                            replayList[beatmapid] = currentReplay;
+                        }
+                    }
                 }
             }
-        }
-    }
 
-    mainWindow.webContents.send('replaylist', replayList);
+            mainWindow.webContents.send('replaylist', replayList);
+        })();
+    }
+}
+
+function isMissingReplays(){
+    return new Promise(function (resolve) {
+        fs.readdir(settings.osuPath + dataPath, (err, files) => {
+            files.forEach(function (file) {
+                if(isUnprocessed(file)) {
+                    resolve(true);
+                }
+            });
+
+            resolve(false);
+        });
+    });
 }
 
 function calcGrade(replay){
@@ -199,13 +248,19 @@ function createProcessReplayWindow(){
         protocol: 'file:',
         slashes: true
     }));
+    processReplayWindow.setMenu(null);
 
     processReplayWindow.webContents.once('dom-ready', function () {
-        (async () => {
-            mainWindow.webContents.send('message', await processReplays(token));
+        if(!settings.osuPath || !settings.apikey) {
+            createSettingsWindow();
             processReplayWindow.close();
-            makeReplayList();
-        })();
+        } else {
+            (async () => {
+                mainWindow.webContents.send('message', await processReplays(token));
+                processReplayWindow.close();
+                makeReplayList();
+            })();
+        }
     });
 
     processReplayWindow.on('close', function () {
@@ -225,6 +280,7 @@ function createSettingsWindow(){
         protocol: 'file:',
         slashes: true
     }));
+    settingsWindow.setMenu(null);
 
     settingsWindow.webContents.once('dom-ready', function () {
         settingsWindow.webContents.send('settings', settings);
@@ -235,17 +291,15 @@ function createSettingsWindow(){
     });
 }
 
-let token = {};
-
 ipcMain.on('replays:cancel', function (e) {
     token.cancel();
+    store.set('processedReplays', processedReplays);
 });
 
 ipcMain.on('settings', function (e, newSettings) {
     settings = newSettings;
-    fs.writeFile('assets/json/settings.json', JSON.stringify(newSettings), 'utf8', function () {
-        settingsWindow.webContents.send('unlock', false);
-    });
+    store.set('settings', newSettings);
+    settingsWindow.webContents.send('unlock', false);
 });
 
 const mainMenuTemplate = [
@@ -275,17 +329,13 @@ const mainMenuTemplate = [
     }
 ];
 
-if(process.platform == 'darwin') {
-    mainMenuTemplate.unshift({});
-}
-
 if(process.env.NODE_ENV !== 'production') {
     mainMenuTemplate.push({
         label: 'Developer Tools',
         submenu: [
             {
                 label: 'Toggle DevTools',
-                accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+                accelerator: 'Ctrl+I',
                 click(item, focusedWindow){
                     focusedWindow.toggleDevTools();
                 }
@@ -296,17 +346,3 @@ if(process.env.NODE_ENV !== 'production') {
         ]
     });
 }
-
-app.on('window-all-closed', () => {
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
-
-app.on('activate', () => {
-    if (win === null) {
-        createWindow();
-    }
-});

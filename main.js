@@ -20,8 +20,103 @@ let test = edge.func({
 });
 
 test('', function (error, result) {
-    console.log(result);
+    if(error) {
+        console.log(error);
+    } else {
+        result.forEach(function (map) {
+            map.replays.forEach(function (data) {
+                processReplayData(map);
+            });
+        });
+    }
 });
+
+function processReplayData(map) {
+    map.replays.forEach(function (data) {
+        let accuracy = getAccuracy(data);
+
+        let processedData = {
+            accuracy: accuracy,
+            grade: getGrade(data, accuracy)
+        };
+
+        console.log(processedData, map.name);
+    });
+}
+
+function getAccuracy(replay) {
+    switch(replay.GameMode) {
+        case 'Standard':
+            return (((replay.Count300) * 300 + (replay.Count100) * 100 + (replay.Count50) * 50)/((replay.Count300+replay.Count100+replay.Count50+replay.CountMiss)*300) * 100).toFixed(2);
+        case 'Taiko':
+            return ((((0.5*replay.Count100) + replay.Count300) / (replay.CountMiss + replay.Count100 + replay.Count300)) * 100).toFixed(2);
+        case 'CatchTheBeat':
+            return (((replay.Count300 + replay.Count100 + replay.Count50) / (replay.CountKatu + replay.CountMiss + replay.Count50 + replay.Count100 + replay.Count300)) * 100).toFixed(2);
+        case 'Mania':
+            return ((((50*replay.Count50) + (100*replay.Count100) + (200*replay.CountKatu) + (300*(replay.Count300 + replay.CountGeki))) / (300*(replay.CountMiss + replay.Count50 + replay.Count100 + replay.CountKatu + replay.Count300 + replay.CountGeki))) * 100).toFixed(2);
+    }
+}
+
+function getGrade(replay, accuracy){
+    if(accuracy === 100) {
+        return 5;
+    }
+
+    switch(replay.GameMode) {
+        case 'Standard':
+            let amountOfNotes = replay.Count300 + replay.Count100 + replay.Count50 + replay.CountMiss;
+            let percent300 = replay.Count300 / amountOfNotes;
+            let percent50 =  replay.Count50 / amountOfNotes;
+
+            if(percent300 > 0.9 && percent50 < 0.01 && replay.CountMiss === 0) {
+                return 4;
+            } else if((percent300 > 0.8 && replay.CountMiss === 0) || percent300 > 0.9) {
+                return 3;
+            } else if((percent300 > 0.7 && replay.CountMiss === 0) || percent300 > 0.8) {
+                return 2;
+            } else if(percent300 > 0.6) {
+                return 1;
+            } else {
+                return 0;
+            }
+        case 'Taiko':
+            //TODO
+            //incomplete?
+            if(accuracy > 95) {
+                return 4;
+            } else if(accuracy > 90) {
+                return 3;
+            } else if(accuracy > 80) {
+                return 2;
+            } else {
+                return 1;
+            }
+        case 'CatchTheBeat':
+            if(accuracy > 98) {
+                return 4;
+            } else if(accuracy > 94) {
+                return 3;
+            } else if(accuracy > 90) {
+                return 2;
+            } else if(accuracy > 85) {
+                return 1;
+            } else {
+                return 0;
+            }
+        case 'Mania':
+            if(accuracy > 95) {
+                return 4;
+            } else if(accuracy > 90) {
+                return 3;
+            } else if(accuracy > 80) {
+                return 2;
+            } else if(accuracy > 70) {
+                return 1;
+            } else {
+                return 0;
+            }
+    }
+}
 
 function getReplayData(path){
     let fullPath = settings.osuPath + dataPath + path;
@@ -64,7 +159,7 @@ function getRelevantData(replay){
                     timestamp: new Date(replay.timestamp).toLocaleDateString('nl-NL'),
                     mods: replay.mods,
                     mode: replay.gameMode,
-                    grade: calcGrade(replay),
+                    grade: getGrade(replay),
                     name: name
                 });
             });
@@ -173,6 +268,8 @@ app.on('ready', function () {
 });
 
 function makeReplayList(){
+    return;
+
     if(Object.keys(processedReplays).length === 0 && processedReplays.constructor === Object) {
         mainWindow.webContents.send('message', 'No replays found, please process them first. (File -> Process Replays)');
     } else {
@@ -214,26 +311,6 @@ function isMissingReplays(){
             resolve(false);
         });
     });
-}
-
-function calcGrade(replay){
-    let amountOfNotes = replay.number_300s + replay.number_100s + replay.number_50s + replay.misses;
-    let percent300 = replay.number_300s / amountOfNotes;
-    let percent50 =  replay.number_50s / amountOfNotes;
-
-    if(replay.accuracy === 100) {
-        return 5;
-    } else if(percent300 > 0.9 && percent50 < 0.01 && replay.misses === 0) {
-        return 4;
-    } else if((percent300 > 0.8 && replay.misses === 0) || percent300 > 0.9) {
-        return 3;
-    } else if((percent300 > 0.7 && replay.misses === 0) || percent300 > 0.8) {
-        return 2;
-    } else if(percent300 > 0.6) {
-        return 1;
-    } else {
-        return 0;
-    }
 }
 
 function createProcessReplayWindow(){

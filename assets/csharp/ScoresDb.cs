@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 public class Startup
 {
-    public static readonly string PathOsu = "D:/Program Files (x86)/osu!";
+    public static readonly string PathOsu = "C:/Users/Yentl-PC/AppData/Local/osu!";
 
     public async Task<object> Invoke(object input)
     {

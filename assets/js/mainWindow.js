@@ -117,7 +117,7 @@ function addHtml(replay) {
     html += '<td><a href="osu://b/' + replay.beatmapdata.beatmap_id + '">' + replay.name + '</a></td>';
     html += '<td>' + numberWithCommas(replay.score) + '</td>';
     html += '<td>' + grade[replay.grade] + '</td>';
-    html += '<td>' + replay.accuracy.toFixed(2) + '%</td>';
+    html += '<td>' + replay.accuracy + '%</td>';
     html += '<td>' + replay.misses + '</td>';
     html += '<td>' + replay.mode + '</td>';
     html += '<td>' + replay.beatmapdata.beatmap_id + '</td>';

@@ -6,7 +6,7 @@ const path = require('path');
 const Store = require('electron-store');
 const store = new Store();
 const edge = require('electron-edge-js');
-let csharpPath, processedReplays, settings, error, getScores;
+let csharpPath, processedReplays, settings, globalError, getScores;
 
 //process.env.NODE_ENV = 'production';
 
@@ -22,7 +22,7 @@ try {
         references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll']
     });
 } catch(ex) {
-    error = ex;
+    globalError = ex;
 }
 
 function processReplayData(map) {
@@ -135,7 +135,7 @@ let mainWindow, processReplayWindow, settingsWindow, errorWindow;
 let token = {};
 
 app.on('ready', function () {
-    if(error) {
+    if(globalError) {
         createErrorWindow();
     } else {
         mainWindow = new BrowserWindow({
@@ -201,7 +201,7 @@ function createErrorWindow(){
     });
 
     errorWindow.webContents.once('dom-ready', function () {
-        errorWindow.webContents.send('message', error.Message);
+        errorWindow.webContents.send('message', globalError.Message);
     });
 }
 
@@ -226,6 +226,7 @@ function createProcessReplayWindow(){
         } else {
             getScores(settings.osuPath, function (error, result) {
                 if(error) {
+                    globalError = error;
                     createErrorWindow();
                     processReplayWindow.close();
                 } else {

@@ -18,7 +18,7 @@ let filters = {
     missesMax: '',
     gradeMin: 'D',
     gradeMax: 'SS',
-    gamemode: '',
+    mode: '',
     beatmap_id: '',
     mapName: '',
     dateMin: '',
@@ -28,12 +28,6 @@ let filters = {
     orderDirection: 'asc'
 };
 let replayList;
-
-echo.init({
-    offset: 100,
-    throttle: 250,
-    unload: false
-});
 
 const numberWithCommas = function(x){
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -47,7 +41,7 @@ function sortList(){
             b = c;
         }
 
-        if(filters.orderType === 'name') {
+        if(filters.orderType === 'name' || filters.orderType === 'mode') {
             return a[filters.orderType].localeCompare(b[filters.orderType]);
         } else if(filters.orderType === 'timestamp') {
             return getDate(a[filters.orderType]) - getDate(b[filters.orderType]);
@@ -68,7 +62,7 @@ function applyFilters(replay, regexName, regex_id){
         && (filters.accuracyMax === '' || replay.accuracy <= filters.accuracyMax)
         && replay.misses >= filters.missesMin
         && (filters.missesMax === '' || replay.misses <= filters.missesMax)
-        && (filters.gamemode === '' || replay.mode.toLowerCase() === filters.gamemode.toLowerCase())
+        && (filters.mode === '' || replay.mode.toLowerCase() === filters.mode.toLowerCase())
         && (filters.dateMin === '' || (getDate(replay.timestamp) - new Date(filters.dateMin)) >= 0)
         && (filters.dateMax === '' || (getDate(replay.timestamp) - new Date(filters.dateMax)) <= 0)
         && !replay.mods.includes('ScoreV2'));
@@ -77,7 +71,7 @@ function applyFilters(replay, regexName, regex_id){
 function addHtml(replay) {
     let html = '';
     html += '<tr hidden style="border: 2px solid;">';
-    html += '<td><img data-echo="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" height="60"></td>';
+    html += '<td><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" height="60"></td>';
     html += '<td><a href="osu://b/' + replay.beatmap_id + '">' + replay.name + '</a></td>';
     html += '<td>' + numberWithCommas(replay.score) + '</td>';
     html += '<td>' + grade[replay.grade] + '</td>';
@@ -115,8 +109,6 @@ function updateReplayList(){
     $('tr:not(.originalTable)').remove();
     $('#replayTable').append(html);
     unhideElements();
-
-    echo.render();
 }
 
 function unhideElements(){

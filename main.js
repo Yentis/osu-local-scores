@@ -201,7 +201,7 @@ function createErrorWindow(){
     });
 
     errorWindow.webContents.once('dom-ready', function () {
-        errorWindow.webContents.send('message', globalError.Message);
+        errorWindow.webContents.send('message', JSON.stringify(globalError));
     });
 }
 

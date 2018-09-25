@@ -28,25 +28,31 @@ public class Startup
 
         foreach (var beatmap in db2.Beatmaps)
         {
-            var beatmapdata = beatmaps[beatmap.Key];
-            var artist = "Unknown Artist";
-            var title = "Unknown Title";
-            var version = "Unknown Version";
+            if(beatmaps.ContainsKey(beatmap.Key))
+            {
+                var beatmapdata = beatmaps[beatmap.Key];
+                var artist = "";
+                var title = "";
+                var version = "";
 
-            if(beatmapdata.Artist != null) {
-                artist = beatmapdata.Artist;
-            }
-            if(beatmapdata.Title != null) {
-                title = beatmapdata.Title;
-            }
-            if(beatmapdata.Version != null) {
-                version = beatmapdata.Version;
-            }
+                if (beatmapdata.Artist != null)
+                {
+                    artist = beatmapdata.Artist;
+                }
+                if (beatmapdata.Title != null)
+                {
+                    title = beatmapdata.Title;
+                }
+                if (beatmapdata.Version != null)
+                {
+                    version = beatmapdata.Version;
+                }
 
-            var name = artist + " - " + title + " [" + version + "]";
-            var replays = beatmap.Value;
+                var name = artist + " - " + title + " [" + version + "]";
+                var replays = beatmap.Value;
 
-            scoresList.Add(new Score(name, beatmapdata.BeatmapId, beatmapdata.BeatmapSetId, replays));
+                scoresList.Add(new Score(name, beatmapdata.BeatmapId, beatmapdata.BeatmapSetId, replays));
+            }
         }
 
         return scoresList;

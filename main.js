@@ -136,27 +136,7 @@ let token = {};
 
 app.on('ready', function () {
     if(error) {
-        errorWindow = new BrowserWindow({
-            width: 300,
-            height: 200,
-            title: 'Error!'
-        });
-
-        errorWindow.setMenu(null);
-
-        errorWindow.loadURL(url.format({
-            pathname: path.join(__dirname, 'errorWindow.html'),
-            protocol: 'file:',
-            slashes: true
-        }));
-
-        errorWindow.on('closed', function () {
-            app.quit();
-        });
-
-        errorWindow.webContents.once('dom-ready', function () {
-            errorWindow.webContents.send('message', error.Message);
-        });
+        createErrorWindow();
     } else {
         mainWindow = new BrowserWindow({
             width: 1600,
@@ -201,6 +181,30 @@ function makeReplayList(){
     }
 }
 
+function createErrorWindow(){
+    errorWindow = new BrowserWindow({
+        width: 300,
+        height: 200,
+        title: 'Error!'
+    });
+
+    errorWindow.setMenu(null);
+
+    errorWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'errorWindow.html'),
+        protocol: 'file:',
+        slashes: true
+    }));
+
+    errorWindow.on('closed', function () {
+        app.quit();
+    });
+
+    errorWindow.webContents.once('dom-ready', function () {
+        errorWindow.webContents.send('message', error.Message);
+    });
+}
+
 function createProcessReplayWindow(){
     processReplayWindow = new BrowserWindow({
         width: 300,
@@ -222,7 +226,8 @@ function createProcessReplayWindow(){
         } else {
             getScores(settings.osuPath, function (error, result) {
                 if(error) {
-                    processReplayWindow.webContents.send('error', JSON.stringify(error));
+                    createErrorWindow();
+                    processReplayWindow.close();
                 } else {
                     processedReplays = {};
 

@@ -6,12 +6,11 @@ let saveButton = document.getElementById('save');
 
 document.getElementById('settings').addEventListener('submit', function (e) {
     e.preventDefault();
-    let apikey = document.getElementById('apikey').value;
     let osuPath = document.getElementById('osuPath').value;
 
     document.getElementById('message').innerHTML = '';
     saveButton.disabled = true;
-    ipcRenderer.send('settings', {osuPath: osuPath, apikey: apikey});
+    ipcRenderer.send('settings', {osuPath: osuPath});
 });
 
 document.getElementById('btn-chooseFolder').addEventListener('click', function () {
@@ -24,11 +23,6 @@ document.getElementById('btn-chooseFolder').addEventListener('click', function (
     })
 });
 
-document.getElementById('apilink').addEventListener('click', function (e) {
-    e.preventDefault();
-    shell.openExternal('https://osu.ppy.sh/p/api');
-});
-
 ipcRenderer.on('unlock', function (e, val) {
     saveButton.disabled = val;
     document.getElementById('message').innerHTML = 'Settings saved.';
@@ -37,8 +31,5 @@ ipcRenderer.on('unlock', function (e, val) {
 ipcRenderer.on('settings', function (e, settings) {
     if(settings.osuPath) {
         document.getElementById('osuPath').value = settings.osuPath;
-    }
-    if(settings.apikey) {
-        document.getElementById('apikey').value = settings.apikey;
     }
 });

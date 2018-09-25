@@ -1,60 +1,69 @@
-const osuReplayParser = require('osureplayparser');
 const fs = require('fs');
-const dataPath = '/Data/r/';
 const https = require('https');
 const {app, BrowserWindow, Menu, ipcMain} =  require('electron');
 const url = require('url');
 const path = require('path');
-const jsonPath = path.resolve(__dirname, 'assets', 'json');
-const csharpPath = path.resolve(__dirname, 'assets', 'csharp');
 const Store = require('electron-store');
 const store = new Store();
 const edge = require('electron-edge-js');
-let processedReplays, settings;
+let csharpPath, processedReplays, settings, error, getScores;
 
 process.env.NODE_ENV = 'production';
 
-let test = edge.func({
-    source: csharpPath + '/ScoresDb.cs',
-    references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll']
-});
+if(process.env.NODE_ENV === 'production') {
+    csharpPath = path.resolve(__dirname, '..', 'csharp');
+} else {
+    csharpPath = path.resolve(__dirname, 'assets', 'csharp');
+}
 
-test('', function (error, result) {
-    if(error) {
-        console.log(error);
-    } else {
-        result.forEach(function (map) {
-            map.replays.forEach(function (data) {
-                processReplayData(map);
-            });
-        });
-    }
-});
+try {
+    getScores = edge.func({
+        source: csharpPath + '/ScoresDb.cs',
+        references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll']
+    });
+} catch(ex) {
+    error = ex;
+}
 
 function processReplayData(map) {
     map.replays.forEach(function (data) {
         let accuracy = getAccuracy(data);
 
-        let processedData = {
+        processedReplays[data.ReplayHash] = {
+            replayHash: data.ReplayHash,
+            beatmap_id: map.beatmap_id.toString(),
+            beatmapset_id: map.beatmapset_id.toString(),
             accuracy: accuracy,
-            grade: getGrade(data, accuracy)
+            grade: getGrade(data, accuracy),
+            misses: data.CountMiss,
+            score: data.Score,
+            timestamp: new Date(data.TimePlayed).toLocaleDateString('nl-NL'),
+            mods: data.Mods.split(', '),
+            mode: data.GameMode,
+            name: map.name
         };
-
-        console.log(processedData, map.name);
     });
 }
 
 function getAccuracy(replay) {
+    let accuracy = 0;
+
     switch(replay.GameMode) {
         case 'Standard':
-            return (((replay.Count300) * 300 + (replay.Count100) * 100 + (replay.Count50) * 50)/((replay.Count300+replay.Count100+replay.Count50+replay.CountMiss)*300) * 100).toFixed(2);
+            accuracy = ((replay.Count300) * 300 + (replay.Count100) * 100 + (replay.Count50) * 50)/((replay.Count300+replay.Count100+replay.Count50+replay.CountMiss)*300);
+            break;
         case 'Taiko':
-            return ((((0.5*replay.Count100) + replay.Count300) / (replay.CountMiss + replay.Count100 + replay.Count300)) * 100).toFixed(2);
+            accuracy = (((0.5*replay.Count100) + replay.Count300) / (replay.CountMiss + replay.Count100 + replay.Count300));
+            break;
         case 'CatchTheBeat':
-            return (((replay.Count300 + replay.Count100 + replay.Count50) / (replay.CountKatu + replay.CountMiss + replay.Count50 + replay.Count100 + replay.Count300)) * 100).toFixed(2);
+            accuracy = ((replay.Count300 + replay.Count100 + replay.Count50) / (replay.CountKatu + replay.CountMiss + replay.Count50 + replay.Count100 + replay.Count300));
+            break;
         case 'Mania':
-            return ((((50*replay.Count50) + (100*replay.Count100) + (200*replay.CountKatu) + (300*(replay.Count300 + replay.CountGeki))) / (300*(replay.CountMiss + replay.Count50 + replay.Count100 + replay.CountKatu + replay.Count300 + replay.CountGeki))) * 100).toFixed(2);
+            accuracy = (((50*replay.Count50) + (100*replay.Count100) + (200*replay.CountKatu) + (300*(replay.Count300 + replay.CountGeki))) / (300*(replay.CountMiss + replay.Count50 + replay.Count100 + replay.CountKatu + replay.Count300 + replay.CountGeki)));
+            break;
     }
+
+    return parseFloat((accuracy * 100).toFixed(2));
 }
 
 function getGrade(replay, accuracy){
@@ -80,16 +89,17 @@ function getGrade(replay, accuracy){
                 return 0;
             }
         case 'Taiko':
-            //TODO
-            //incomplete?
+        case 'Mania':
             if(accuracy > 95) {
                 return 4;
             } else if(accuracy > 90) {
                 return 3;
             } else if(accuracy > 80) {
                 return 2;
-            } else {
+            } else if(accuracy > 70) {
                 return 1;
+            } else {
+                return 0;
             }
         case 'CatchTheBeat':
             if(accuracy > 98) {
@@ -103,136 +113,15 @@ function getGrade(replay, accuracy){
             } else {
                 return 0;
             }
-        case 'Mania':
-            if(accuracy > 95) {
-                return 4;
-            } else if(accuracy > 90) {
-                return 3;
-            } else if(accuracy > 80) {
-                return 2;
-            } else if(accuracy > 70) {
-                return 1;
-            } else {
-                return 0;
-            }
     }
-}
-
-function getReplayData(path){
-    let fullPath = settings.osuPath + dataPath + path;
-    let replay = osuReplayParser.parseReplay(fullPath);
-    return new Promise(resolve => {
-        resolve(getRelevantData(replay));
-    });
-}
-
-function getRelevantData(replay){
-    return new Promise(resolve => {
-        let accuracy = (((replay.number_300s) * 300 + (replay.number_100s) * 100 + (replay.number_50s) * 50)/((replay.number_300s+replay.number_100s+replay.number_50s+replay.misses)*300) * 100);
-
-        https.get('https://osu.ppy.sh/api/get_beatmaps?k=' + settings.apikey + '&h=' + replay.beatmapMD5, (resp) => {
-            let data = '';
-
-            // A chunk of data has been recieved.
-            resp.on('data', (chunk) => {
-                data += chunk;
-            });
-
-            // The whole response has been received. Print out the result.
-            resp.on('end', () => {
-                let beatmapdata = JSON.parse(data)[0];
-                let name;
-
-                if(beatmapdata) {
-                    name = beatmapdata.artist + ' - ' + beatmapdata.title + ' [' + beatmapdata.version + ']';
-                }
-
-                resolve({
-                    beatmapdata: beatmapdata,
-                    accuracy: accuracy,
-                    number_300s: replay.number_300s,
-                    number_100s: replay.number_100s,
-                    number_50s: replay.number_50s,
-                    misses: replay.misses,
-                    score: replay.score,
-                    max_combo: replay.max_combo,
-                    timestamp: new Date(replay.timestamp).toLocaleDateString('nl-NL'),
-                    mods: replay.mods,
-                    mode: replay.gameMode,
-                    grade: getGrade(replay),
-                    name: name
-                });
-            });
-
-        }).on("error", (err) => {
-            resolve({error: err.message});
-        });
-    });
-}
-
-async function asyncForEach(array, callback) {
-    for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array)
-    }
-}
-
-async function processReplays(token){
-    return new Promise(function(resolve, reject) {
-        let json;
-        let cancelled = false;
-
-        token.cancel = function () {
-            cancelled = true;
-        };
-
-        fs.readdir(settings.osuPath + dataPath, (err, files) => {
-            const start = async () => {
-                asyncForEach(files, async (file, index) => {
-                    if(cancelled) {
-                        throw 'Cancelled';
-                    }
-
-                    if(isUnprocessed(file)) {
-                        let replayData = await getReplayData(file);
-
-                        if(replayData) {
-                            if(replayData.error){
-                                processReplayWindow.webContents.send('error', replayData.error);
-                            } else {
-                                processedReplays[file] = replayData;
-                                let dataToSend = {
-                                    name: file.split('-')[0],
-                                    percentage: Math.round((index / files.length) * 100)
-                                };
-                                processReplayWindow.webContents.send('replay', dataToSend);
-                            }
-                        }
-                    }
-                }).then(function () {
-                    store.set('processedReplays', processedReplays);
-                    resolve('Your replays have been processed successfully.');
-                }).catch(function () {
-                    resolve('Replay processing has been cancelled.');
-                });
-            };
-
-            start();
-        });
-    });
-}
-
-function isUnprocessed(file){
-    return !!(file.endsWith('osr') && !processedReplays[file]);
 }
 
 function getData(){
-    processedReplays = store.get('processedReplays');
-    settings = store.get('settings');
-
-    if(!processedReplays) {
-        store.set('processedReplays', {});
-        processedReplays = {};
+    if(store.get('processedReplays')) {
+        store.delete('processedReplays');
     }
+
+    settings = store.get('settings');
 
     if(!settings) {
         store.set('settings', {});
@@ -242,75 +131,74 @@ function getData(){
 
 getData();
 
-let mainWindow, processReplayWindow, settingsWindow;
+let mainWindow, processReplayWindow, settingsWindow, errorWindow;
 let token = {};
 
 app.on('ready', function () {
-    mainWindow = new BrowserWindow({
-        width: 1600,
-        height: 600
-    });
+    if(error) {
+        errorWindow = new BrowserWindow({
+            width: 300,
+            height: 200,
+            title: 'Error!'
+        });
 
-    mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, 'mainWindow.html'),
-        protocol: 'file:',
-        slashes: true
-    }));
+        errorWindow.setMenu(null);
 
-    mainWindow.on('closed', function () {
-        app.quit();
-    });
+        errorWindow.loadURL(url.format({
+            pathname: path.join(__dirname, 'errorWindow.html'),
+            protocol: 'file:',
+            slashes: true
+        }));
 
-    mainWindow.webContents.once('dom-ready', makeReplayList);
+        errorWindow.on('closed', function () {
+            app.quit();
+        });
 
-    const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
-    Menu.setApplicationMenu(mainMenu);
+        errorWindow.webContents.once('dom-ready', function () {
+            errorWindow.webContents.send('message', error.Message);
+        });
+    } else {
+        mainWindow = new BrowserWindow({
+            width: 1600,
+            height: 600
+        });
+
+        mainWindow.loadURL(url.format({
+            pathname: path.join(__dirname, 'mainWindow.html'),
+            protocol: 'file:',
+            slashes: true
+        }));
+
+        mainWindow.on('closed', function () {
+            app.quit();
+        });
+
+        mainWindow.webContents.once('dom-ready', makeReplayList);
+
+        const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
+        Menu.setApplicationMenu(mainMenu);
+    }
 });
 
 function makeReplayList(){
-    return;
-
-    if(Object.keys(processedReplays).length === 0 && processedReplays.constructor === Object) {
+    if (!processedReplays || Object.keys(processedReplays).length === 0 && processedReplays.constructor === Object) {
         mainWindow.webContents.send('message', 'No replays found, please process them first. (File -> Process Replays)');
     } else {
         let replayList = [];
 
-        (async () => {
-            if(await isMissingReplays()) {
-                mainWindow.webContents.send('message', 'Unprocessed replays found, please process them. (File -> Process Replays)');
-            }
+        for (let key in processedReplays) {
+            if (processedReplays.hasOwnProperty(key)) {
+                let currentReplay = processedReplays[key];
+                let beatmapid = currentReplay.beatmap_id;
 
-            for (let key in processedReplays) {
-                if (processedReplays.hasOwnProperty(key)) {
-                    let currentReplay = processedReplays[key];
-
-                    if(currentReplay.beatmapdata) {
-                        let beatmapid = currentReplay.beatmapdata.beatmap_id;
-
-                        if(!replayList[beatmapid] || (replayList[beatmapid] && replayList[beatmapid].score < currentReplay.score)) {
-                            replayList[beatmapid] = currentReplay;
-                        }
-                    }
+                if (!replayList[beatmapid] || (replayList[beatmapid] && replayList[beatmapid].score < currentReplay.score)) {
+                    replayList[beatmapid] = currentReplay;
                 }
             }
+        }
 
-            mainWindow.webContents.send('replaylist', replayList);
-        })();
+        mainWindow.webContents.send('replaylist', replayList);
     }
-}
-
-function isMissingReplays(){
-    return new Promise(function (resolve) {
-        fs.readdir(settings.osuPath + dataPath, (err, files) => {
-            files.forEach(function (file) {
-                if(isUnprocessed(file)) {
-                    resolve(true);
-                }
-            });
-
-            resolve(false);
-        });
-    });
 }
 
 function createProcessReplayWindow(){
@@ -328,15 +216,25 @@ function createProcessReplayWindow(){
     processReplayWindow.setMenu(null);
 
     processReplayWindow.webContents.once('dom-ready', function () {
-        if(!settings.osuPath || !settings.apikey) {
+        if(!settings.osuPath) {
             createSettingsWindow();
             processReplayWindow.close();
         } else {
-            (async () => {
-                mainWindow.webContents.send('message', await processReplays(token));
-                processReplayWindow.close();
-                makeReplayList();
-            })();
+            getScores(settings.osuPath, function (error, result) {
+                if(error) {
+                    processReplayWindow.webContents.send('error', JSON.stringify(error));
+                } else {
+                    processedReplays = {};
+
+                    result.forEach(function (map) {
+                        processReplayData(map);
+                    });
+
+                    mainWindow.webContents.send('message', 'Your replays have been processed successfully.');
+                    processReplayWindow.close();
+                    makeReplayList();
+                }
+            });
         }
     });
 

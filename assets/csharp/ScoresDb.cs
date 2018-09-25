@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 public class Startup
 {
-    public static readonly string PathOsu = "C:/Users/Yentl-PC/AppData/Local/osu!";
-
-    public async Task<object> Invoke(object input)
+    public async Task<object> Invoke(string input)
     {
+        string PathOsu = input;
+
         OsuDb db = OsuDb.Read(PathOsu + "/osu!.db");
         var beatmaps = new Dictionary<string, BeatmapEntry>();
         for (int i = 0; i < db.Beatmaps.Count; i++)
@@ -32,7 +32,7 @@ public class Startup
             var name = beatmapdata.Artist + " - " + beatmapdata.Title + " [" + beatmapdata.Version + "]";
             var replays = beatmap.Value;
 
-            scoresList.Add(new Score(name, replays));
+            scoresList.Add(new Score(name, beatmapdata.BeatmapId, beatmapdata.BeatmapSetId, replays));
         }
 
         return scoresList;
@@ -42,11 +42,15 @@ public class Startup
 public class Score
 {
     public string name;
+    public int beatmap_id;
+    public int beatmapset_id;
     public List<Replay> replays;
 
-    public Score(string name, List<Replay> replays)
+    public Score(string name, int beatmap_id, int beatmapset_id, List<Replay> replays)
     {
         this.name = name;
+        this.beatmap_id = beatmap_id;
+        this.beatmapset_id = beatmapset_id;
         this.replays = replays;
     }
 }

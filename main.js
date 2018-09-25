@@ -8,7 +8,7 @@ const store = new Store();
 const edge = require('electron-edge-js');
 let csharpPath, processedReplays, settings, error, getScores;
 
-process.env.NODE_ENV = 'production';
+//process.env.NODE_ENV = 'production';
 
 if(process.env.NODE_ENV === 'production') {
     csharpPath = path.resolve(__dirname, '..', 'csharp');

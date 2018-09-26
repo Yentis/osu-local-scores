@@ -8,7 +8,8 @@
     "echo-js": "^1.7.3",
     "electron-edge-js": "^8.3.8",
     "electron-store": "^2.0.0",
-    "jquery": "^3.3.1"
+    "jquery": "^3.3.1",
+    "ojsama": "^1.0.19"
   },
   "scripts": {
     "start": "electron .",

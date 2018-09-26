@@ -6,6 +6,19 @@ const path = require('path');
 const Store = require('electron-store');
 const store = new Store();
 const edge = require('electron-edge-js');
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+const modTable = {
+    "Easy":"EZ",
+    "NoFail":"NF",
+    "HalfTime":"HT",
+    "HardRock":"HR",
+    "Nightcore": "NC",
+    "DoubleTime":"DT",
+    "Hidden":"HD",
+    "Flashlight":"FL",
+    "SpunOut":"SO"
+};
 let csharpPath, processedReplays, settings, globalError, getScores;
 
 //process.env.NODE_ENV = 'production';
@@ -19,30 +32,85 @@ if(process.env.NODE_ENV === 'production') {
 try {
     getScores = edge.func({
         source: csharpPath + '/ScoresDb.cs',
-        references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll']
+        references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll', csharpPath + '/OppaiSharp.dll']
     });
 } catch(ex) {
     globalError = ex;
 }
 
-function processReplayData(map) {
-    map.replays.forEach(function (data) {
-        let accuracy = getAccuracy(data);
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array)
+    }
+}
 
-        processedReplays[data.ReplayHash] = {
-            replayHash: data.ReplayHash,
-            beatmap_id: map.beatmap_id.toString(),
-            beatmapset_id: map.beatmapset_id.toString(),
-            accuracy: accuracy,
-            grade: getGrade(data, accuracy),
-            misses: data.CountMiss,
-            score: data.Score,
-            timestamp: new Date(data.TimePlayed).toLocaleDateString('nl-NL'),
-            mods: data.Mods.split(', '),
-            mode: data.GameMode,
-            name: map.name
-        };
+function processReplayData(map) {
+    const start = async () => {
+        asyncForEach(map.replays, async (data) => {
+            let accuracy = getAccuracy(data);
+            let pp = await getPP(map.path, data, accuracy);
+
+            processedReplays[data.ReplayHash] = {
+                replayHash: data.ReplayHash,
+                beatmap_id: map.beatmap_id.toString(),
+                beatmapset_id: map.beatmapset_id.toString(),
+                accuracy: accuracy,
+                grade: getGrade(data, accuracy),
+                misses: data.CountMiss,
+                score: data.Score,
+                timestamp: new Date(data.TimePlayed).toLocaleDateString('nl-NL'),
+                mods: data.Mods.split(', '),
+                mode: data.GameMode,
+                name: map.name,
+                combo: parseInt(data.Combo),
+                max_combo: map.max_combo > 0 ? Math.max(parseInt(map.max_combo), parseInt(data.Combo)) : 0,
+                pp: pp
+            };
+        }).catch(function (err) {
+            console.log(err);
+        });
+    };
+    start();
+}
+
+function getPP(path, data, accuracy){
+    let mods = modsConverter(data.Mods) + ' ';
+
+    (async () => {
+        return await runOppai('oppai ' + '"' + path + '"' + mods + accuracy + '%');
+    })();
+}
+
+function modsConverter(mods){
+    let modArray = mods.split(', ');
+    let convertedString = '';
+
+    modArray.forEach(function (mod) {
+        let convertedMod = modTable[mod];
+
+        if(convertedMod) {
+            convertedString += convertedMod;
+        }
     });
+
+    if(convertedString.length > 0) {
+        convertedString = ' +' + convertedString;
+    }
+
+    return convertedString;
+}
+
+async function runOppai(args){
+    const {stdout, stderr} = await exec(args);
+
+    if(stderr) {
+        console.log(stderr);
+        return;
+    }
+
+    let ppLine = stdout.split('\n');
+    let pp = ppLine[ppLine.length-3].split(' ');
+    return(pp[0]);
 }
 
 function getAccuracy(replay) {
@@ -117,21 +185,23 @@ function getGrade(replay, accuracy){
 }
 
 function getData(){
-    if(store.get('processedReplays')) {
-        store.delete('processedReplays');
-    }
-
+    processedReplays = store.get('processedReplays');
     settings = store.get('settings');
 
     if(!settings) {
         store.set('settings', {});
         settings = {};
     }
+
+    if(!processedReplays) {
+        store.set('processedReplays', {});
+        processedReplays = {};
+    }
 }
 
 getData();
 
-let mainWindow, processReplayWindow, settingsWindow, errorWindow;
+let mainWindow, processReplayWindow, settingsWindow, errorWindow, modsWindow;
 let token = {};
 
 app.on('ready', function () {
@@ -139,7 +209,7 @@ app.on('ready', function () {
         createErrorWindow();
     } else {
         mainWindow = new BrowserWindow({
-            width: 1600,
+            width: 1450,
             height: 600
         });
 
@@ -232,9 +302,28 @@ function createProcessReplayWindow(){
                 } else {
                     processedReplays = {};
 
-                    result.forEach(function (map) {
+                    let testdata = [];
+
+                    for(let i = 0; i < 10; i++) {
+                        testdata[i] = result[i];
+                    }
+
+                    const start = async () => {
+                        asyncForEach(testdata, async (file) => {
+                            processReplayData(file);
+                        }).then(function () {
+                            console.log(processedReplays);
+                        }).catch(function (err) {
+                            console.log(err);
+                        });
+                    };
+                    start();
+
+                    /*result.forEach(function (map) {
                         processReplayData(map);
-                    });
+                    });*/
+
+                    //store.set('processedReplays', processedReplays);
 
                     mainWindow.webContents.send('message', 'Your replays have been processed successfully.');
                     processReplayWindow.close();
@@ -272,6 +361,29 @@ function createSettingsWindow(){
     });
 }
 
+function createModsWindow(){
+    modsWindow = new BrowserWindow({
+        width: 550,
+        height: 250,
+        title: 'Mods'
+    });
+
+    modsWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'modsWindow.html'),
+        protocol: 'file:',
+        slashes: true
+    }));
+    modsWindow.setMenu(null);
+
+    modsWindow.webContents.once('dom-ready', function () {
+
+    });
+
+    modsWindow.on('close', function () {
+        settingsWindow = null;
+    });
+}
+
 ipcMain.on('replays:cancel', function (e) {
     token.cancel();
     store.set('processedReplays', processedReplays);
@@ -281,6 +393,15 @@ ipcMain.on('settings', function (e, newSettings) {
     settings = newSettings;
     store.set('settings', newSettings);
     settingsWindow.webContents.send('unlock', false);
+});
+
+ipcMain.on('mods', function (e) {
+    createModsWindow();
+});
+
+ipcMain.on('modsResult', function (e, modsResult) {
+    mainWindow.webContents.send('modsResult', modsResult);
+    modsWindow.close();
 });
 
 const mainMenuTemplate = [

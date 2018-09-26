@@ -68,9 +68,7 @@ public class Score
     public string path;
     public int beatmap_id;
     public int beatmapset_id;
-    public int max_combo = 0;
     public List<Replay> replays;
-    public List<double> pp = new List<double>();
 
     public Score(string name, string path, int beatmap_id, int beatmapset_id, List<Replay> replays)
     {
@@ -79,55 +77,5 @@ public class Score
         this.beatmap_id = beatmap_id;
         this.beatmapset_id = beatmapset_id;
         this.replays = replays;
-
-        /*for(var i = 0; i < replays.Count; i++)
-        {
-            pp.Add(CalcPP(replays[i]));
-        }*/
     }
-
-    /*public double CalcPP(Replay replay)
-    {
-        if (replay.GameMode == osu.Shared.GameMode.Standard)
-        {
-            //beatmap to streamreader
-            try
-            {
-                byte[] data = File.ReadAllBytes(path);
-                var stream = new MemoryStream(data, false);
-                var reader = new StreamReader(stream);
-
-                //read beatmap
-                var beatmap = Beatmap.Read(reader);
-
-                //get mods
-                Mods mods = (Mods)replay.Mods;
-                var diff = new DiffCalc().Calc(beatmap, mods);
-
-                //calc pp
-                var replayData = replay;
-                try
-                {
-                    //if we don't know max combo yet set it
-                    if(max_combo == 0)
-                    {
-                        max_combo = beatmap.GetMaxCombo();
-                    }
-
-                    var pp = new PPv2(new PPv2Parameters(beatmap, diff, c100: replay.Count100, c50: replay.Count50, cMiss: replay.CountMiss, combo: replay.Combo, c300: replay.Count300, mods: mods));
-                    return pp.Total;
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    return 0;
-                }
-            } catch(FileNotFoundException)
-            {
-                return 0;
-            }
-        } else
-        {
-            return 0;
-        }
-    }*/
 }

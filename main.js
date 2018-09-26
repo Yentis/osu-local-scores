@@ -8,21 +8,22 @@ const store = new Store();
 const edge = require('electron-edge-js');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-const {Hello} = require('./build/Release/addon');
+const {GetPP} = require('./build/Release/addon');
 const modTable = {
-    "Easy":"EZ",
-    "NoFail":"NF",
-    "HalfTime":"HT",
-    "HardRock":"HR",
-    "Nightcore": "NC",
-    "DoubleTime":"DT",
-    "Hidden":"HD",
-    "Flashlight":"FL",
-    "SpunOut":"SO"
+    "None": 0,
+    "NoFail": 1<<0,
+    "Easy": 1<<1,
+    "TouchDevice": 1<<2,
+    "Hidden": 1<<3,
+    "HardRock": 1<<4,
+    "DoubleTime": 1<<6,
+    "HalfTime": 1<<8,
+    "Nightcore": 1<<9,
+    "Flashlight": 1<<10,
+    "SpunOut": 1<<12
 };
-let csharpPath, processedReplays, settings, globalError, getScores;
 
-console.log(Hello());
+let csharpPath, processedReplays, settings, globalError, getScores;
 
 //process.env.NODE_ENV = 'production';
 
@@ -41,66 +42,49 @@ try {
     globalError = ex;
 }
 
-async function asyncForEach(array, callback) {
-    for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array)
-    }
-}
-
 function processReplayData(map) {
-    const start = async () => {
-        asyncForEach(map.replays, async (data) => {
-            let accuracy = getAccuracy(data);
-            let pp = await getPP(map.path, data, accuracy);
+    map.replays.forEach(function (data) {
+        let accuracy = getAccuracy(data);
+        let mods = modsConverter(data.Mods);
+        let pp, max_combo;
+        if(data.GameMode === 'Standard') {
+            let oppaiData = GetPP(map.path, mods, data.Combo, data.Count100, data.Count50, data.CountMiss);
+            pp = oppaiData[0].toFixed(2);
+            max_combo = oppaiData[1];
+        }
 
-            processedReplays[data.ReplayHash] = {
-                replayHash: data.ReplayHash,
-                beatmap_id: map.beatmap_id.toString(),
-                beatmapset_id: map.beatmapset_id.toString(),
-                accuracy: accuracy,
-                grade: getGrade(data, accuracy),
-                misses: data.CountMiss,
-                score: data.Score,
-                timestamp: new Date(data.TimePlayed).toLocaleDateString('nl-NL'),
-                mods: data.Mods.split(', '),
-                mode: data.GameMode,
-                name: map.name,
-                combo: parseInt(data.Combo),
-                max_combo: map.max_combo > 0 ? Math.max(parseInt(map.max_combo), parseInt(data.Combo)) : 0,
-                pp: pp
-            };
-        }).catch(function (err) {
-            console.log(err);
-        });
-    };
-    start();
-}
-
-function getPP(path, data, accuracy){
-    let mods = modsConverter(data.Mods) + ' ';
-
-    (async () => {
-        return await runOppai('oppai ' + '"' + path + '"' + mods + accuracy + '%');
-    })();
+        processedReplays[data.ReplayHash] = {
+            replayHash: data.ReplayHash,
+            beatmap_id: map.beatmap_id.toString(),
+            beatmapset_id: map.beatmapset_id.toString(),
+            accuracy: accuracy,
+            grade: getGrade(data, accuracy),
+            misses: data.CountMiss,
+            score: data.Score,
+            timestamp: new Date(data.TimePlayed).toLocaleDateString('nl-NL'),
+            mods: data.Mods.split(', '),
+            mode: data.GameMode,
+            name: map.name,
+            combo: parseInt(data.Combo),
+            max_combo: max_combo || 0,
+            pp: pp || 0
+        };
+    });
 }
 
 function modsConverter(mods){
     let modArray = mods.split(', ');
-    let convertedString = '';
+    let modList = 0;
 
     modArray.forEach(function (mod) {
         let convertedMod = modTable[mod];
 
         if(convertedMod) {
-            convertedString += convertedMod;
+            modList ^= convertedMod;
         }
     });
 
-    if(convertedString.length > 0) {
-        convertedString = ' +' + convertedString;
-    }
-
-    return convertedString;
+    return modList;
 }
 
 async function runOppai(args){
@@ -305,26 +289,9 @@ function createProcessReplayWindow(){
                 } else {
                     processedReplays = {};
 
-                    let testdata = [];
-
-                    for(let i = 0; i < 10; i++) {
-                        testdata[i] = result[i];
-                    }
-
-                    const start = async () => {
-                        asyncForEach(testdata, async (file) => {
-                            processReplayData(file);
-                        }).then(function () {
-                            console.log(processedReplays);
-                        }).catch(function (err) {
-                            console.log(err);
-                        });
-                    };
-                    start();
-
-                    /*result.forEach(function (map) {
+                    result.forEach(function (map) {
                         processReplayData(map);
-                    });*/
+                    });
 
                     //store.set('processedReplays', processedReplays);
 

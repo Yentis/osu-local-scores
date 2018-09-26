@@ -8,6 +8,7 @@ const store = new Store();
 const edge = require('electron-edge-js');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const {Hello} = require('./build/Release/addon');
 const modTable = {
     "Easy":"EZ",
     "NoFail":"NF",
@@ -20,6 +21,8 @@ const modTable = {
     "SpunOut":"SO"
 };
 let csharpPath, processedReplays, settings, globalError, getScores;
+
+console.log(Hello());
 
 //process.env.NODE_ENV = 'production';
 

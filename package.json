@@ -9,14 +9,17 @@
     "electron-edge-js": "^8.3.8",
     "electron-store": "^2.0.0",
     "jquery": "^3.3.1",
-    "ojsama": "^1.0.19"
+    "nan": "^2.6.1",
+    "node-gyp": "^3.6.0"
   },
   "scripts": {
+    "compile": "node-gyp rebuild --runtime=electron --target=2.0.10 --disturl=https://atom.io/download/atom-shell --abi=57",
     "start": "electron .",
     "package-win": "electron-packager . --overwrite --asar.unpackDir=node_modules/edge-cs/** --extraResource=assets/csharp/ --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=Yentis --version-string.FileDescription=oRM --version-string.ProductName=\"osu! Replay Manager\""
   },
   "devDependencies": {
     "electron": "^2.0.10",
     "electron-packager": "^12.1.2"
-  }
+  },
+  "gypfile": true
 }

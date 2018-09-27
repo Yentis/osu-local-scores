@@ -80,7 +80,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     int32_t max_combo = b_max_combo(&map);
     Local<Array> result_list = Array::New(isolate, 2);
 
-    if(max_combo == 0)
+    if(max_combo <= 0)
     {
         info("Path: %s\n", path);
         info("Mods: %s\n", std::to_string(mods).c_str());

@@ -36,7 +36,7 @@ const modText = {
     "SpunOut":"SO"
 };
 
-console.log(GetPP("C:\\Users\\Yentl-PC\\AppData\\Local\\osu!\\Songs\\579451 USAO - Extra Mode\\USAO - Extra Mode (_MiaoFUuU_) [Rhythm Crisis].osu", modTable.DoubleTime, 1361, 10, 0, 1));
+console.log(GetPP("C:\\Users\\Yentl-PC\\AppDatdsfsda\\Local\\osu!\\Songs\\579451 USAO - Extra Mode\\USAO - Extra Mode (_MiaoFUuU_) [Rhythm Crisis].osu", modTable.DoubleTime, 1361, 10, 0, 1));
 
 let csharpPath, processedReplays, settings, globalError, getScores;
 

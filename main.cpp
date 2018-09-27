@@ -62,7 +62,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     errno = 0;
     FILE * mapFile;
     mapFile = fopen(path,"r");
-    if (mapFile==NULL)
+    if(mapFile==NULL)
     {
         info("Failed to open file, error: %s\n", std::to_string(errno).c_str());
     }
@@ -92,7 +92,10 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     result_list->Set(0, Number::New(isolate, pp.total));
     result_list->Set(1, Number::New(isolate, max_combo));
 
-    fclose(mapFile);
+    if(mapFile != NULL)
+    {
+        fclose(mapFile);
+    }
 
     args.GetReturnValue().Set(result_list);
 }

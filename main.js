@@ -7,7 +7,7 @@ const Store = require('electron-store');
 const store = new Store();
 const edge = require('electron-edge-js');
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const {exec} = require('child_process');
 const {GetPP} = require('./build/Release/addon');
 const modTable = {
     "None": 0,
@@ -21,6 +21,19 @@ const modTable = {
     "Nightcore": 1<<9,
     "Flashlight": 1<<10,
     "SpunOut": 1<<12
+};
+
+const modText = {
+    "None": "NM",
+    "Easy":"EZ",
+    "NoFail":"NF",
+    "HalfTime":"HT",
+    "HardRock":"HR",
+    "Nightcore": "NC",
+    "DoubleTime":"DT",
+    "Hidden":"HD",
+    "Flashlight":"FL",
+    "SpunOut":"SO"
 };
 
 let csharpPath, processedReplays, settings, globalError, getScores;
@@ -42,10 +55,37 @@ try {
     globalError = ex;
 }
 
+function oppaiCmd(hash, cmd){
+    let child = exec(cmd);
+
+    // Listen for any response:
+    child.stdout.on('data', function (data) {
+        let ppLine = data.split('\n');
+        let pp = ppLine[ppLine.length-3].split(' ')[0];
+        let max_combo = ppLine[ppLine.length-4].split(' ')[1].split('/')[0];
+        processedReplays[hash].pp = pp;
+        processedReplays[hash].max_combo = max_combo;
+    });
+
+    // Listen for any errors:
+    child.stderr.on('data', function (data) {
+        console.log(child.pid, data);
+    });
+
+    // Listen if the process closed
+    child.on('close', function(exit_code) {
+        console.log('Closed before stop: Closing code: ', exit_code);
+    });
+}
+
+function cmdBuilder(path, mods, count100, count50, countmiss, combo){
+    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
+}
+
 function processReplayData(map) {
     map.replays.forEach(function (data) {
         let accuracy = getAccuracy(data);
-        let mods = modsConverter(data.Mods);
+        let mods = modsToBit(data.Mods);
         let pp, max_combo;
         if(data.GameMode === 'Standard') {
             let oppaiData = GetPP(map.path, mods, data.Combo, data.Count100, data.Count50, data.CountMiss);
@@ -72,7 +112,7 @@ function processReplayData(map) {
     });
 }
 
-function modsConverter(mods){
+function modsToBit(mods){
     let modArray = mods.split(', ');
     let modList = 0;
 
@@ -87,17 +127,19 @@ function modsConverter(mods){
     return modList;
 }
 
-async function runOppai(args){
-    const {stdout, stderr} = await exec(args);
+function modsToText(mods){
+    let modArray = mods.split(', ');
+    let modList = '';
 
-    if(stderr) {
-        console.log(stderr);
-        return;
-    }
+    modArray.forEach(function (mod) {
+        let convertedMod = modText[mod];
 
-    let ppLine = stdout.split('\n');
-    let pp = ppLine[ppLine.length-3].split(' ');
-    return(pp[0]);
+        if(convertedMod) {
+            modList += convertedMod;
+        }
+    });
+
+    return modList;
 }
 
 function getAccuracy(replay) {
@@ -289,11 +331,12 @@ function createProcessReplayWindow(){
                 } else {
                     processedReplays = {};
 
-                    result.forEach(function (map) {
-                        processReplayData(map);
+                    result.forEach(function (map, i) {
+                        console.log('Progress: ' + i + ' of ' + result.length);
+                        processReplayData(result[i]);
                     });
 
-                    //store.set('processedReplays', processedReplays);
+                    store.set('processedReplays', processedReplays);
 
                     mainWindow.webContents.send('message', 'Your replays have been processed successfully.');
                     processReplayWindow.close();

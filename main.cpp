@@ -88,6 +88,8 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         info("100s: %s\n", std::to_string(n100).c_str());
         info("50s: %s\n", std::to_string(n50).c_str());
         info("Misses: %s\n", std::to_string(nmiss).c_str());
+        b_ppv2(&map, &pp, stars.aim, stars.speed, mods);
+        info("Base: %s\n", std::to_string(pp.total).c_str());
     }
 
     result_list->Set(0, Number::New(isolate, pp.total));

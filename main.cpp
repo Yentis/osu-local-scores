@@ -62,7 +62,12 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     mapFile = fopen(path,"r");
     if (mapFile==NULL)
     {
-        info("Error opening file!: %s\n", path);
+        info("Trying to open file again...");
+        mapFile = fopen(path,"r");
+        if (mapFile==NULL)
+        {
+            info("Failed again...");
+        }
     }
 
     p_init(&pstate);

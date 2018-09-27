@@ -1,5 +1,6 @@
 #define OPPAI_IMPLEMENTATION
 #include <nan.h>
+#include <errno.h>
 #include <string>
 #include "../../assets/c/oppai.c"
 
@@ -58,16 +59,12 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     String::Utf8Value str(args[0]);
     const char* path = ToCString(str);
 
+    errno = 0;
     FILE * mapFile;
     mapFile = fopen(path,"r");
     if (mapFile==NULL)
     {
-        info("Trying to open file again...");
-        mapFile = fopen(path,"r");
-        if (mapFile==NULL)
-        {
-            info("Failed again...");
-        }
+        info("Failed to open file, error: %s\n", std::to_string(errno).c_str());
     }
 
     p_init(&pstate);

@@ -15,10 +15,6 @@ using v8::Value;
 using v8::Array;
 using v8::Number;
 
-const char* ToCString(const String::Utf8Value& value) {
-  return *value ? *value : "<string conversion failed>";
-}
-
 int info(char const* fmt, ...)
 {
     int res;
@@ -56,16 +52,16 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     pp_init(&pp_params);
 
     //path param to char*
-    String::Utf8Value str(args[0]);
-    const char* path = ToCString(str);
+    LPCWSTR path = (LPCWSTR) * String::Value(args[0]->ToString());
 
     errno = 0;
     FILE * mapFile;
-    mapFile = fopen(path,"r");
+    mapFile = _wfopen(path, L"r");
+
     if(mapFile==NULL)
     {
         info("Failed to open file, error: %s\n", std::to_string(errno).c_str());
-        info("Path: %s\n", path);
+        //info("Path: %s\n", path.c_str());
     }
 
     p_init(&pstate);

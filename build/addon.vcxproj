@@ -11,12 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{EF41262B-2C58-B1C6-45D9-BEDF1C50D5BD}</ProjectGuid>
+    <ProjectGuid>{94C43955-13F2-30A4-1D3C-F498DC39B429}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>addon</RootNamespace>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Label="Configuration">
@@ -48,7 +48,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Yentl\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj /MP %(AdditionalOptions)</AdditionalOptions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -68,7 +68,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\Users\Yentl\.node-gyp\iojs-2.0.10\x64\iojs.lib&quot;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\x64\iojs.lib&quot;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4199 %(AdditionalOptions)</AdditionalOptions>
       <AllowIsolation>true</AllowIsolation>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -83,13 +83,13 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>C:\Users\Yentl\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=addon;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;BUILDING_NODE_EXTENSION;DEBUG;_DEBUG;V8_ENABLE_CHECKS;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Yentl\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -116,7 +116,7 @@
       <AdditionalOptions>/LTCG %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\Users\Yentl\.node-gyp\iojs-2.0.10\x64\iojs.lib&quot;</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\x64\iojs.lib&quot;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4199 %(AdditionalOptions)</AdditionalOptions>
       <AllowIsolation>true</AllowIsolation>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -134,7 +134,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>C:\Users\Yentl\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\include\node;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\src;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\uv\include;C:\Users\Yentl-PC\.node-gyp\iojs-2.0.10\deps\v8\include;..\node_modules\nan;\assets\c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=addon;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;BUILDING_NODE_EXTENSION;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
@@ -143,7 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp"/>
-    <ClCompile Include="C:\Users\Yentl\AppData\Roaming\npm\node_modules\npm\node_modules\node-gyp\src\win_delay_load_hook.cc"/>
+    <ClCompile Include="C:\Users\Yentl-PC\AppData\Roaming\npm\node_modules\npm\node_modules\node-gyp\src\win_delay_load_hook.cc"/>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
   <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets"/>

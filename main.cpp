@@ -18,6 +18,18 @@ const char* ToCString(const String::Utf8Value& value) {
   return *value ? *value : "<string conversion failed>";
 }
 
+int info(char const* fmt, ...)
+{
+    int res;
+
+    va_list va;
+    va_start(va, fmt);
+    res = vfprintf(stderr, fmt, va);
+    va_end(va);
+
+    return res;
+}
+
 void Method(const FunctionCallbackInfo<Value>& args) {
     Isolate* isolate = args.GetIsolate();
 
@@ -67,6 +79,16 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     b_ppv2p(&map, &pp, &pp_params);
     int32_t max_combo = b_max_combo(&map);
     Local<Array> result_list = Array::New(isolate, 2);
+
+    if(max_combo == 0)
+    {
+        info("Path: %s\n", path);
+        info("Mods: %s\n", std::to_string(mods).c_str());
+        info("Combo: %s\n", std::to_string(combo).c_str());
+        info("100s: %s\n", std::to_string(n100).c_str());
+        info("50s: %s\n", std::to_string(n50).c_str());
+        info("Misses: %s\n", std::to_string(nmiss).c_str());
+    }
 
     result_list->Set(0, Number::New(isolate, pp.total));
     result_list->Set(1, Number::New(isolate, max_combo));

@@ -90,6 +90,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         info("Misses: %s\n", std::to_string(nmiss).c_str());
         b_ppv2(&map, &pp, stars.aim, stars.speed, mods);
         info("Base: %s\n", std::to_string(pp.total).c_str());
+        info("Base Max Combo: %s\n", std::to_string(b_max_combo(&map)).c_str());
     }
 
     result_list->Set(0, Number::New(isolate, pp.total));

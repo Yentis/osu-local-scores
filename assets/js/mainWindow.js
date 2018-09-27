@@ -10,21 +10,22 @@ const grade = {
     0: 'D'
 };
 const mods = {
-    "None":"Nomod",
-    "Easy":"Easy",
-    "NoFail":"No Fail",
-    "HalfTime":"Halftime",
-    "HardRock":"Hard Rock",
-    "SuddenDeath":"Suddendeath",
-    "DoubleTime":"Doubletime",
-    "FadeIn":"Fade-In",
-    "Hidden":"Hidden",
-    "Flashlight":"Flashlight",
+    "None":"",
+    "Easy":"EZ",
+    "NoFail":"NF",
+    "HalfTime":"HT",
+    "HardRock":"HR",
+    "SuddenDeath":"SD",
+    "Perfect": "PF",
+    "DoubleTime":"DT",
+    "FadeIn":"FI",
+    "Hidden":"HD",
+    "Flashlight":"FL",
     "KeyCoop":"Co-op",
     "Random":"Random",
-    "Relax":"Relax",
-    "Relax2":"Auto Pilot",
-    "SpunOut":"Spun Out",
+    "Relax":"RX",
+    "Relax2":"AP",
+    "SpunOut":"SO",
     "ScoreV2":"Score V2",
     "TouchDevice":"Touch Device / No Video",
     "Key1":"1K",
@@ -136,15 +137,25 @@ function addHtml(replay) {
     html += '<td>' + replay.accuracy + '%</td>';
     html += '<td>' + replay.misses + '</td>';
     html += '<td>' + replay.combo + '/' + (replay.max_combo === 0 ? '?' : replay.max_combo) + '</td>';
-    html += '<td>';
-    replay.mods.forEach(function (mod) {
-        html += mods[mod] + '<br>';
-    });
-    html += '</td>';
+    html += '<td>' + getModString(replay) + '</td>';
     html += '<td style="width: 100px">' + replay.timestamp + '</td>';
     html += '<td>' + replay.pp + '</td>';
     html += '</tr>';
     return html;
+}
+
+function getModString(replay) {
+    let modString = '';
+
+    replay.mods.forEach(function (mod, i) {
+        modString += mods[mod];
+
+        if(i < replay.mods.length - 1) {
+            modString += ', ';
+        }
+    });
+
+    return modString;
 }
 
 function updateReplayList(){

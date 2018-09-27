@@ -7,8 +7,13 @@ const Store = require('electron-store');
 const store = new Store();
 const edge = require('electron-edge-js');
 const util = require('util');
-const {exec} = require('child_process');
+const EventEmitter = require('events');
 const {GetPP} = require('./build/Release/addon');
+const {execSync} = require('child_process');
+
+class DataEmitter extends EventEmitter {}
+const dataEmitter = new DataEmitter();
+
 const modTable = {
     "None": 0,
     "NoFail": 1<<0,
@@ -36,9 +41,10 @@ const modText = {
     "SpunOut":"SO"
 };
 
-console.log(GetPP("C:\\Usefdsfds    rs\\Yentl-PC\\AppDatdsfsda\\Local\\osu!\\Songs\\579451 USAO - Extra Mode\\USAO - Extra Mode (_MiaoFUuU_) [Rhythm Crisis].osu", modTable.DoubleTime, 1361, 10, 0, 1));
-
+let pressedCancel = false;
 let csharpPath, processedReplays, settings, globalError, getScores;
+
+//console.log(GetPP("C:\\Usefdsfds    rs\\Yentl-PC\\AppDatdsfsda\\Local\\osu!\\Songs\\579451 USAO - Extra Mode\\USAO - Extra Mode (_MiaoFUuU_) [Rhythm Crisis].osu", modTable.DoubleTime, 1361, 10, 0, 1));
 
 //process.env.NODE_ENV = 'production';
 
@@ -55,63 +61,6 @@ try {
     });
 } catch(ex) {
     globalError = ex;
-}
-
-function oppaiCmd(hash, cmd){
-    let child = exec(cmd);
-
-    // Listen for any response:
-    child.stdout.on('data', function (data) {
-        let ppLine = data.split('\n');
-        let pp = ppLine[ppLine.length-3].split(' ')[0];
-        let max_combo = ppLine[ppLine.length-4].split(' ')[1].split('/')[0];
-        processedReplays[hash].pp = pp;
-        processedReplays[hash].max_combo = max_combo;
-    });
-
-    // Listen for any errors:
-    child.stderr.on('data', function (data) {
-        console.log(child.pid, data);
-    });
-
-    // Listen if the process closed
-    child.on('close', function(exit_code) {
-        console.log('Closed before stop: Closing code: ', exit_code);
-    });
-}
-
-function cmdBuilder(path, mods, count100, count50, countmiss, combo){
-    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
-}
-
-function processReplayData(map) {
-    map.replays.forEach(function (data) {
-        let accuracy = getAccuracy(data);
-        let mods = modsToBit(data.Mods);
-        let pp, max_combo;
-        if(data.GameMode === 'Standard') {
-            let oppaiData = GetPP(map.path, mods, data.Combo, data.Count100, data.Count50, data.CountMiss);
-            pp = oppaiData[0].toFixed(2);
-            max_combo = oppaiData[1];
-        }
-
-        processedReplays[data.ReplayHash] = {
-            replayHash: data.ReplayHash,
-            beatmap_id: map.beatmap_id.toString(),
-            beatmapset_id: map.beatmapset_id.toString(),
-            accuracy: accuracy,
-            grade: getGrade(data, accuracy),
-            misses: data.CountMiss,
-            score: data.Score,
-            timestamp: new Date(data.TimePlayed).toLocaleDateString('nl-NL'),
-            mods: data.Mods.split(', '),
-            mode: data.GameMode,
-            name: map.name,
-            combo: parseInt(data.Combo),
-            max_combo: max_combo || 0,
-            pp: pp || 0
-        };
-    });
 }
 
 function modsToBit(mods){
@@ -142,6 +91,48 @@ function modsToText(mods){
     });
 
     return modList;
+}
+
+function oppaiCmd(cmd){
+    let stdout = execSync(cmd).toString();
+
+    let ppLine = stdout.split('\n');
+    let pp = ppLine[ppLine.length-3].split(' ')[0];
+    let max_combo = ppLine[ppLine.length-4].split(' ')[1].split('/')[0];
+
+    return [pp, max_combo];
+}
+
+function cmdBuilder(path, mods, count100, count50, countmiss, combo){
+    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
+}
+
+function processReplayData(map, deep) {
+    map.replays.forEach(function (data) {
+        if(!deep && processedReplays[data.ReplayHash]) {
+            return;
+        }
+
+        let accuracy = getAccuracy(data);
+        let oppaiData = getOppaiData(map.path, data.Mods, data.Combo, data.Count100, data.Count50, data.CountMiss, data.GameMode);
+
+        processedReplays[data.ReplayHash] = {
+            replayHash: data.ReplayHash,
+            beatmap_id: map.beatmap_id.toString(),
+            beatmapset_id: map.beatmapset_id.toString(),
+            accuracy: accuracy,
+            grade: getGrade(data, accuracy),
+            misses: data.CountMiss,
+            score: data.Score,
+            timestamp: new Date(data.TimePlayed).toLocaleDateString('nl-NL'),
+            mods: data.Mods.split(', '),
+            mode: data.GameMode,
+            name: map.name,
+            combo: parseInt(data.Combo),
+            max_combo: parseInt(oppaiData[1]),
+            pp: parseFloat(oppaiData[0]).toFixed(2)
+        };
+    });
 }
 
 function getAccuracy(replay) {
@@ -215,6 +206,53 @@ function getGrade(replay, accuracy){
     }
 }
 
+function getOppaiData(path, mods, combo, count100, count50, countmiss, gamemode){
+    let pp = 0;
+    let max_combo = 0;
+
+    if(gamemode === 'Standard' || gamemode === 'Taiko') {
+        let modBits = modsToBit(mods);
+        let oppaiData = GetPP(path, modBits, combo, count100, count50, countmiss);
+
+        if(!Array.isArray(oppaiData)) {
+            let textMods = modsToText(mods);
+            oppaiData = oppaiCmd(cmdBuilder(path, textMods, combo, count100, count50, countmiss));
+        }
+
+        pp = oppaiData[0];
+        max_combo = oppaiData[1];
+    }
+
+    return [pp, max_combo];
+}
+
+function processLargeArray(array, chunk, deep) {
+    let index = 0;
+    let timeoutLength = 50;
+    if(!deep) {
+        timeoutLength = 1;
+    }
+
+    function doChunk() {
+        let cnt = chunk;
+
+        while (cnt-- && index < array.length) {
+            processReplayData(array[index], deep);
+            ++index;
+        }
+
+        if(!pressedCancel && index < array.length) {
+            processReplayWindow.webContents.send('progress', {index: index, total: array.length});
+            // set Timeout for async iteration
+            setTimeout(doChunk, timeoutLength);
+        } else {
+            dataEmitter.emit('done');
+        }
+    }
+
+    doChunk();
+}
+
 function getData(){
     processedReplays = store.get('processedReplays');
     settings = store.get('settings');
@@ -233,14 +271,13 @@ function getData(){
 getData();
 
 let mainWindow, processReplayWindow, settingsWindow, errorWindow, modsWindow;
-let token = {};
 
 app.on('ready', function () {
     if(globalError) {
         createErrorWindow();
     } else {
         mainWindow = new BrowserWindow({
-            width: 1450,
+            width: 1380,
             height: 600
         });
 
@@ -306,7 +343,7 @@ function createErrorWindow(){
     });
 }
 
-function createProcessReplayWindow(){
+function createProcessReplayWindow(deep){
     processReplayWindow = new BrowserWindow({
         width: 300,
         height: 200,
@@ -331,18 +368,8 @@ function createProcessReplayWindow(){
                     createErrorWindow();
                     processReplayWindow.close();
                 } else {
-                    processedReplays = {};
-
-                    result.forEach(function (map, i) {
-                        console.log('Progress: ' + i + ' of ' + result.length);
-                        processReplayData(result[i]);
-                    });
-
-                    store.set('processedReplays', processedReplays);
-
-                    mainWindow.webContents.send('message', 'Your replays have been processed successfully.');
-                    processReplayWindow.close();
-                    makeReplayList();
+                    pressedCancel = false;
+                    processLargeArray(result, Math.round(result.length / 100), deep);
                 }
             });
         }
@@ -352,6 +379,17 @@ function createProcessReplayWindow(){
         processReplayWindow = null;
     });
 }
+
+dataEmitter.on('done', function () {
+    store.set('processedReplays', processedReplays);
+    if(pressedCancel) {
+        mainWindow.webContents.send('message', 'Cancelled processing.');
+    } else {
+        mainWindow.webContents.send('message', 'Your replays have been processed successfully.');
+    }
+    processReplayWindow.close();
+    makeReplayList();
+});
 
 function createSettingsWindow(){
     settingsWindow = new BrowserWindow({
@@ -399,11 +437,6 @@ function createModsWindow(){
     });
 }
 
-ipcMain.on('replays:cancel', function (e) {
-    token.cancel();
-    store.set('processedReplays', processedReplays);
-});
-
 ipcMain.on('settings', function (e, newSettings) {
     settings = newSettings;
     store.set('settings', newSettings);
@@ -419,6 +452,10 @@ ipcMain.on('modsResult', function (e, modsResult) {
     modsWindow.close();
 });
 
+ipcMain.on('cancelled', function (e) {
+    pressedCancel = true;
+});
+
 const mainMenuTemplate = [
     {
         label: 'File',
@@ -426,7 +463,13 @@ const mainMenuTemplate = [
             {
                 label: 'Process replays',
                 click(){
-                    createProcessReplayWindow();
+                    createProcessReplayWindow(false);
+                }
+            },
+            {
+                label: 'Reprocess replays',
+                click(){
+                    createProcessReplayWindow(true);
                 }
             },
             {

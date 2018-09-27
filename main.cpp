@@ -15,6 +15,10 @@ using v8::Value;
 using v8::Array;
 using v8::Number;
 
+const char* ToCString(const String::Utf8Value& value) {
+  return *value ? *value : "<string conversion failed>";
+}
+
 int info(char const* fmt, ...)
 {
     int res;
@@ -60,41 +64,50 @@ void Method(const FunctionCallbackInfo<Value>& args) {
 
     if(mapFile==NULL)
     {
-        info("Failed to open file, error: %s\n", std::to_string(errno).c_str());
-        //info("Path: %s\n", path.c_str());
+        //try with fopen
+        String::Utf8Value str(args[0]);
+        const char* pathNarrow = ToCString(str);
+
+        errno = 0;
+        mapFile = fopen(pathNarrow, "r");
     }
 
-    p_init(&pstate);
-    p_map(&pstate, &map,mapFile);
 
-    d_init(&stars);
-    d_calc(&stars, &map, mods);
-
-    //required
-    pp_params.aim = stars.aim;
-    pp_params.speed = stars.speed;
-
-    //optional
-    pp_params.mods = mods;
-    pp_params.combo = combo;
-    pp_params.n100 = n100;
-    pp_params.n50 = n50;
-    pp_params.nmiss = nmiss;
-
-    //b_ppv2(&map, &pp, stars.aim, stars.speed, mods);
-    b_ppv2p(&map, &pp, &pp_params);
-    int32_t max_combo = b_max_combo(&map);
-    Local<Array> result_list = Array::New(isolate, 2);
-
-    result_list->Set(0, Number::New(isolate, pp.total));
-    result_list->Set(1, Number::New(isolate, max_combo));
-
-    if(mapFile != NULL)
+    if(mapFile==NULL)
     {
-        fclose(mapFile);
-    }
+        info("Failed to open file, error: %s\n", std::to_string(errno).c_str());
+        args.GetReturnValue().Set(args[0]);
+    } else
+    {
+        p_init(&pstate);
+        p_map(&pstate, &map,mapFile);
 
-    args.GetReturnValue().Set(result_list);
+        d_init(&stars);
+        d_calc(&stars, &map, mods);
+
+        //required
+        pp_params.aim = stars.aim;
+        pp_params.speed = stars.speed;
+
+        //optional
+        pp_params.mods = mods;
+        pp_params.combo = combo;
+        pp_params.n100 = n100;
+        pp_params.n50 = n50;
+        pp_params.nmiss = nmiss;
+
+        //b_ppv2(&map, &pp, stars.aim, stars.speed, mods);
+        b_ppv2p(&map, &pp, &pp_params);
+        int32_t max_combo = b_max_combo(&map);
+        Local<Array> result_list = Array::New(isolate, 2);
+
+        result_list->Set(0, Number::New(isolate, pp.total));
+        result_list->Set(1, Number::New(isolate, max_combo));
+
+        fclose(mapFile);
+
+        args.GetReturnValue().Set(result_list);
+    }
 }
 
 void Initialize(Local<Object> exports) {

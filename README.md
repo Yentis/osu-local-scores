@@ -6,5 +6,5 @@ Process local replays and present them in a filterable way.
 npm start
 
 <h1>Libraries used</h1>
-<a href="https://github.com/Francesco149/oppai-ng">oppai-ng</a>
+<a href="https://github.com/Francesco149/oppai-ng">oppai-ng</a><br>
 <a href="https://github.com/HoLLy-HaCKeR/osu-database-reader">osu-database-reader</a>

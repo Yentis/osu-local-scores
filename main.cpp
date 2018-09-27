@@ -89,19 +89,10 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     int32_t max_combo = b_max_combo(&map);
     Local<Array> result_list = Array::New(isolate, 2);
 
-    if(max_combo <= 0)
-    {
-        info("Path: %s\n", path);
-        info("Mods: %s\n", std::to_string(mods).c_str());
-        info("Combo: %s\n", std::to_string(combo).c_str());
-        info("100s: %s\n", std::to_string(n100).c_str());
-        info("50s: %s\n", std::to_string(n50).c_str());
-        info("Misses: %s\n", std::to_string(nmiss).c_str());
-
-    }
-
     result_list->Set(0, Number::New(isolate, pp.total));
     result_list->Set(1, Number::New(isolate, max_combo));
+
+    fclose(mapFile);
 
     args.GetReturnValue().Set(result_list);
 }

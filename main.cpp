@@ -58,8 +58,15 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     String::Utf8Value str(args[0]);
     const char* path = ToCString(str);
 
+    FILE * mapFile;
+    mapFile = fopen(path,"r");
+    if (mapFile==NULL)
+    {
+        info("Error opening file!: %s\n", path);
+    }
+
     p_init(&pstate);
-    p_map(&pstate, &map, fopen(path, "r"));
+    p_map(&pstate, &map,mapFile);
 
     d_init(&stars);
     d_calc(&stars, &map, mods);
@@ -88,9 +95,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         info("100s: %s\n", std::to_string(n100).c_str());
         info("50s: %s\n", std::to_string(n50).c_str());
         info("Misses: %s\n", std::to_string(nmiss).c_str());
-        b_ppv2(&map, &pp, stars.aim, stars.speed, mods);
-        info("Base: %s\n", std::to_string(pp.total).c_str());
-        info("Base Max Combo: %s\n", std::to_string(b_max_combo(&map)).c_str());
+
     }
 
     result_list->Set(0, Number::New(isolate, pp.total));

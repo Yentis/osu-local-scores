@@ -65,6 +65,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     if(mapFile==NULL)
     {
         info("Failed to open file, error: %s\n", std::to_string(errno).c_str());
+        info("Path: %s\n", path);
     }
 
     p_init(&pstate);

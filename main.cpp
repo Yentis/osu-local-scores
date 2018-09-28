@@ -72,7 +72,6 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         mapFile = fopen(pathNarrow, "r");
     }
 
-
     if(mapFile==NULL)
     {
         info("Failed to open file, error: %s\n", std::to_string(errno).c_str());
@@ -80,7 +79,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     } else
     {
         p_init(&pstate);
-        p_map(&pstate, &map,mapFile);
+        p_map(&pstate, &map, mapFile);
 
         d_init(&stars);
         d_calc(&stars, &map, mods);

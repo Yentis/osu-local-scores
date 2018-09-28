@@ -213,7 +213,7 @@ function getOppaiData(path, mods, combo, count100, count50, countmiss, gamemode)
     let max_combo = 0;
     let max_pp = 0;
 
-    if(gamemode === 'Standard' || gamemode === 'Taiko') {
+    if(gamemode === 'Standard') {
         let modBits = modsToBit(mods);
         let oppaiData = GetPP(path, modBits, combo, count100, count50, countmiss);
 

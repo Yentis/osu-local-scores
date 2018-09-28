@@ -1,6 +1,6 @@
  addon
 
- Timestamp is 5bad7630 (Fri Sep 28 02:30:40 2018)
+ Timestamp is 5bae6669 (Fri Sep 28 19:35:37 2018)
 
  Preferred load address is 0000000180000000
 
@@ -81,30 +81,30 @@
  0001:00004cfc       ??0length_error@std@@QEAA@AEBV01@@Z 0000000180005cfc f i libcpmt:xthrow.obj
  0001:00004d3c       ??0length_error@std@@QEAA@PEBD@Z 0000000180005d3c f i libcpmt:xthrow.obj
  0001:00004d88       ??0logic_error@std@@QEAA@AEBV01@@Z 0000000180005d88 f i libcpmt:xthrow.obj
- 0001:00004dc8       ??1bad_array_new_length@std@@UEAA@XZ 0000000180005dc8 f i LIBCMT:throw_bad_alloc.obj
- 0001:00004dc8       ??1length_error@std@@UEAA@XZ 0000000180005dc8 f i libcpmt:xthrow.obj
  0001:00004dc8       ??1bad_alloc@std@@UEAA@XZ  0000000180005dc8 f i libcpmt:xthrow.obj
+ 0001:00004dc8       ??1length_error@std@@UEAA@XZ 0000000180005dc8 f i libcpmt:xthrow.obj
+ 0001:00004dc8       ??1bad_array_new_length@std@@UEAA@XZ 0000000180005dc8 f i LIBCMT:throw_bad_alloc.obj
  0001:00004dc8       ??1bad_exception@std@@UEAA@XZ 0000000180005dc8 f i libvcruntime:frame.obj
- 0001:00004ddc       ??_Elength_error@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
- 0001:00004ddc       ??_Ebad_exception@std@@UEAAPEAXI@Z 0000000180005ddc f i libvcruntime:frame.obj
- 0001:00004ddc       ??_Gbad_alloc@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
- 0001:00004ddc       ??_Gbad_exception@std@@UEAAPEAXI@Z 0000000180005ddc f i libvcruntime:frame.obj
  0001:00004ddc       ??_Glogic_error@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
- 0001:00004ddc       ??_Glength_error@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
- 0001:00004ddc       ??_Elogic_error@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
- 0001:00004ddc       ??_Ebad_alloc@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
+ 0001:00004ddc       ??_Gbad_alloc@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
  0001:00004ddc       ??_Eexception@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
- 0001:00004ddc       ??_Gbad_array_new_length@std@@UEAAPEAXI@Z 0000000180005ddc f i LIBCMT:throw_bad_alloc.obj
- 0001:00004ddc       ??_Ebad_array_new_length@std@@UEAAPEAXI@Z 0000000180005ddc f i LIBCMT:throw_bad_alloc.obj
  0001:00004ddc       ??_Gexception@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
+ 0001:00004ddc       ??_Ebad_array_new_length@std@@UEAAPEAXI@Z 0000000180005ddc f i LIBCMT:throw_bad_alloc.obj
+ 0001:00004ddc       ??_Elogic_error@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
+ 0001:00004ddc       ??_Glength_error@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
+ 0001:00004ddc       ??_Gbad_array_new_length@std@@UEAAPEAXI@Z 0000000180005ddc f i LIBCMT:throw_bad_alloc.obj
+ 0001:00004ddc       ??_Ebad_alloc@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
+ 0001:00004ddc       ??_Elength_error@std@@UEAAPEAXI@Z 0000000180005ddc f i libcpmt:xthrow.obj
+ 0001:00004ddc       ??_Gbad_exception@std@@UEAAPEAXI@Z 0000000180005ddc f i libvcruntime:frame.obj
+ 0001:00004ddc       ??_Ebad_exception@std@@UEAAPEAXI@Z 0000000180005ddc f i libvcruntime:frame.obj
  0001:00004e20       ?_Xlength_error@std@@YAXPEBD@Z 0000000180005e20 f   libcpmt:xthrow.obj
  0001:00004e44       ?what@exception@std@@UEBAPEBDXZ 0000000180005e44 f i libcpmt:xthrow.obj
  0001:00004e70       __security_check_cookie    0000000180005e70 f   LIBCMT:_amdsecgs_.obj
  0001:00004e94       ??2@YAPEAX_K@Z             0000000180005e94 f   LIBCMT:new_scalar.obj
  0001:00004ed0       ??3@YAXPEAX_K@Z            0000000180005ed0 f   LIBCMT:delete_scalar_size.obj
  0001:00005208       _DllMainCRTStartup         0000000180006208 f   LIBCMT:dll_dllmain.obj
- 0001:00005248       ??_Gtype_info@@UEAAPEAXI@Z 0000000180006248 f i LIBCMT:std_type_info_static.obj
  0001:00005248       ??_Etype_info@@UEAAPEAXI@Z 0000000180006248 f i LIBCMT:std_type_info_static.obj
+ 0001:00005248       ??_Gtype_info@@UEAAPEAXI@Z 0000000180006248 f i LIBCMT:std_type_info_static.obj
  0001:00005274       __raise_securityfailure    0000000180006274 f   LIBCMT:gs_report.obj
  0001:000052a8       __report_gsfailure         00000001800062a8 f   LIBCMT:gs_report.obj
  0001:0000537c       __report_rangecheckfailure 000000018000637c f   LIBCMT:gs_report.obj
@@ -115,8 +115,8 @@
  0001:00005590       ?__scrt_throw_std_bad_array_new_length@@YAXXZ 0000000180006590 f   LIBCMT:throw_bad_alloc.obj
  0001:000055b0       ??3@YAXPEAX@Z              00000001800065b0 f   LIBCMT:delete_scalar.obj
  0001:000055b8       __security_init_cookie     00000001800065b8 f   LIBCMT:gs_support.obj
- 0001:00005664       DllMain                    0000000180006664 f   LIBCMT:dll_dllmain_stub.obj
  0001:00005664       _get_startup_argv_mode     0000000180006664 f   LIBCMT:argv_mode.obj
+ 0001:00005664       DllMain                    0000000180006664 f   LIBCMT:dll_dllmain_stub.obj
  0001:0000566c       ?__scrt_initialize_type_info@@YAXXZ 000000018000666c f   LIBCMT:tncleanup.obj
  0001:0000567c       ?__scrt_uninitialize_type_info@@YAXXZ 000000018000667c f   LIBCMT:tncleanup.obj
  0001:00005688       __scrt_initialize_default_local_stdio_options 0000000180006688 f   LIBCMT:default_local_stdio_options.obj
@@ -1431,7 +1431,7 @@
  0002:00008b70       ??_C@_01KDCPPGHE@r@        000000018002bb70     main.obj
  0002:00008b78       ??_C@_0CA@HLLJFBNG@Failed?5to?5open?5file?0?5error?3?5?$CFs?6@ 000000018002bb78     main.obj
  0002:00008b98       ??_C@_05DPOINIJK@GetPP@    000000018002bb98     main.obj
- 0002:00008ba0       ??_C@_0CK@LPEKAOLN@d?3?2repositories?2osu?9local?9score@ 000000018002bba0     main.obj
+ 0002:00008ba0       ??_C@_0CK@BOHDIKFD@e?3?2repositories?2osu?9local?9score@ 000000018002bba0     main.obj
  0002:00008bcc       ??_C@_05ONJGPJEO@addon@    000000018002bbcc     main.obj
  0002:00008c28       __real@3f000000            000000018002bc28     main.obj
  0002:00008c2c       __real@3f400000            000000018002bc2c     main.obj

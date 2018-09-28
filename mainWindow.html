@@ -10,7 +10,21 @@
 <p id="message"></p>
 <table id="replayTable" class="centered">
     <thead>
-        <tr class="originalTable">
+        <tr>
+            <th id="showamount"></th>
+            <th>Name</th>
+            <th>Gamemode</th>
+            <th>Beatmap ID</th>
+            <th>Score</th>
+            <th>Grade</th>
+            <th>Accuracy</th>
+            <th>Misses</th>
+            <th>Combo / Max</th>
+            <th>Mods</th>
+            <th>Date</th>
+            <th>PP / Max</th>
+        </tr>
+        <tr>
             <td>
                 <label>Order by</label>
                 <select id="orderType">
@@ -32,60 +46,56 @@
                 </select>
             </td>
             <td>
-                <input type="text" class="filter" id="mapName" placeholder="Search">
+                <input type="text" id="mapName" placeholder="Search">
             </td>
             <td>
-                <input type="text" class="filter" id="mode" placeholder="Mode">
+                <input type="text" id="mode" placeholder="Mode">
             </td>
             <td>
-                <input type="number" class="filter" id="beatmap_id" placeholder="ID">
+                <input type="number" id="beatmap_id" placeholder="ID">
             </td>
             <td>
-                <input type="number" class="filter" id="scoreMin" placeholder="Min">
-                <input type="number" class="filter" id="scoreMax" placeholder="Max">
+                <input type="number" id="scoreMin" placeholder="Min">
+                <input type="number" id="scoreMax" placeholder="Max">
             </td>
             <td>
-                <input type="text" class="filter" id="gradeMin" placeholder="Min">
-                <input type="text" class="filter" id="gradeMax" placeholder="Max">
+                <input type="text" id="gradeMin" placeholder="Min">
+                <input type="text" id="gradeMax" placeholder="Max">
             </td>
             <td>
-                <input type="number" class="filter" id="accuracyMin" placeholder="Min">
-                <input type="number" class="filter" id="accuracyMax" placeholder="Max">
+                <input type="number" id="accuracyMin" placeholder="Min %">
+                <input type="number" id="accuracyMax" placeholder="Max %">
             </td>
             <td>
-                <input type="number" class="filter" id="missesMin" placeholder="Min">
-                <input type="number" class="filter" id="missesMax" placeholder="Max">
+                <input type="number" id="missesMin" placeholder="Min">
+                <input type="number" id="missesMax" placeholder="Max">
             </td>
             <td>
-                <input type="number" class="filter" id="comboMin" placeholder="Min %">
-                <input type="number" class="filter" id="comboMax" placeholder="Max %">
+                <select id="comboFilterType">
+                    <option value="percent">Percentage</option>
+                    <option value="number">Number</option>
+                </select>
+                <input type="number" id="comboMin" placeholder="Min">
+                <input type="number" id="comboMax" placeholder="Max">
             </td>
             <td>
                 <button class="waves-effect waves-light btn" id="includeMods" style="margin-bottom: 5px;">Include</button>
                 <button class="waves-effect waves-light btn" id="excludeMods">Exclude</button>
             </td>
             <td>
-                <label for="dateMin">≥</label><input type="date" class="filter" id="dateMin">
-                <label for="dateMax">≤</label><input type="date" class="filter" id="dateMax">
+                <input type="text" id="dateMin" class="datepicker" placeholder="Min">
+                <input type="text" id="dateMax" class="datepicker" placeholder="Max">
             </td>
             <td>
-                <input type="number" class="filter" id="ppMin" placeholder="Min">/<input type="number" class="filter" id="max_ppMin" placeholder="Min">
-                <input type="number" class="filter" id="ppMax" placeholder="Max">/<input type="number" class="filter" id="max_ppMax" placeholder="Max">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input type="number" id="ppMin" placeholder="Min"><input type="number" id="ppMax" placeholder="Max">
+                    </div>
+                    <div class="input-field col s6">
+                        <input type="number" id="max_ppMin" placeholder="Min"><input type="number" id="max_ppMax" placeholder="Max">
+                    </div>
+                </div>
             </td>
-        </tr>
-        <tr class="originalTable">
-            <th id="showamount"></th>
-            <th>Name</th>
-            <th>Gamemode</th>
-            <th>Beatmap ID</th>
-            <th>Score</th>
-            <th>Grade</th>
-            <th>Accuracy</th>
-            <th>Misses</th>
-            <th>Combo</th>
-            <th>Mods</th>
-            <th>Date</th>
-            <th>PP</th>
         </tr>
     </thead>
 </table>

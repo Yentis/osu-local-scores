@@ -64,7 +64,8 @@ $(document).ready(function () {
         max_ppMax: '',
         amountToShow: baseShow,
         orderType: 'name',
-        orderDirection: 'asc'
+        orderDirection: 'asc',
+        comboFilterType: 'percent'
     };
     let replayList, waitingTypeMods;
 
@@ -73,6 +74,7 @@ $(document).ready(function () {
     };
 
     $('select').formSelect();
+    $('.datepicker').datepicker();
 
     function sortList(list, orderType, orderDirection){
         orderType = orderType || filters.orderType;
@@ -114,22 +116,51 @@ $(document).ready(function () {
             && (filters.mode === '' || replay.mode.toLowerCase() === filters.mode.toLowerCase())
             && (filters.dateMin === '' || (getDate(replay.timestamp) - new Date(filters.dateMin)) >= 0)
             && (filters.dateMax === '' || (getDate(replay.timestamp) - new Date(filters.dateMax)) <= 0)
-            && (filters.excludedMods.length === 0 || !hasMod(filters.excludedMods, replay.mods))
+            && (filters.excludedMods.length === 0 || hasNoMod(filters.excludedMods, replay.mods))
             && (filters.includedMods.length === 0 || hasMod(filters.includedMods, replay.mods))
             && (filters.ppMax === '' || replay.pp <= filters.ppMax)
             && replay.pp >= filters.ppMin
-            && (filters.comboMax === '' || (replay.max_combo > 0 ? (replay.combo / replay.max_combo) * 100 : parseInt(filters.comboMax) + 1) <= parseInt(filters.comboMax))
-            && (filters.comboMin === '' || (replay.max_combo > 0 ? (replay.combo / replay.max_combo) * 100 : parseInt(filters.comboMin) - 1) >= parseInt(filters.comboMin))
+            && (filters.comboMax === '' || filterCombo(replay.combo, replay.max_combo, filters.comboMax, 1))
+            && (filters.comboMin === '' || filterCombo(replay.combo, replay.max_combo, filters.comboMin, -1))
             && (filters.max_ppMax === '' || replay.max_pp <= filters.max_ppMax)
             && replay.max_pp >= filters.max_ppMin);
     }
 
+    function filterCombo(combo, max_combo, filterCombo, direction) {
+        let comboToCompare = 0;
+
+
+        if(filters.comboFilterType === 'percent') {
+            comboToCompare = max_combo > 0 ? (combo / max_combo) * 100 : parseInt(filterCombo) + direction;
+        } else {
+            comboToCompare = combo;
+        }
+
+        if(direction === 1) {
+            return comboToCompare <= parseInt(filterCombo);
+        } else {
+            return comboToCompare >= parseInt(filterCombo);
+        }
+    }
+
     function hasMod(source, target) {
-        let result = false;
+        let matchCount = 0;
 
         source.forEach(function (mod) {
             if(target.includes(mod)) {
-                result = true;
+                matchCount++;
+            }
+        });
+
+        return matchCount === source.length;
+    }
+
+    function hasNoMod(source, target) {
+        let result = true;
+
+        source.forEach(function (mod) {
+            if(target.includes(mod)) {
+                result = false;
             }
         });
 
@@ -147,10 +178,10 @@ $(document).ready(function () {
         html += '<td>' + grade[replay.grade] + '</td>';
         html += '<td>' + replay.accuracy + '%</td>';
         html += '<td>' + replay.misses + '</td>';
-        html += '<td>' + replay.combo + '/' + (replay.max_combo === 0 ? '?' : replay.max_combo) + '</td>';
+        html += '<td>' + replay.combo + ' / ' + (replay.max_combo === 0 ? '?' : replay.max_combo) + '</td>';
         html += '<td>' + getModString(replay) + '</td>';
         html += '<td style="width: 100px">' + replay.timestamp + '</td>';
-        html += '<td>' + replay.pp + '/' + replay.max_pp + '</td>';
+        html += '<td>' + replay.pp.toFixed(2) + ' / ' + replay.max_pp.toFixed(2) + '</td>';
         html += '</tr>';
         return html;
     }

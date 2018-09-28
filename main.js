@@ -110,7 +110,7 @@ function processReplayData(map, deep) {
 
         let accuracy = getAccuracy(data);
         let oppaiData = getOppaiData(map.path, data.Mods, data.Combo, data.Count100, data.Count50, data.CountMiss, data.GameMode);
-        let combo = parseInt(data.Combo);
+        let combo = data.Combo;
 
         //if combo is somehow larger than max combo let's just assume that our combo is an FC (problem with oppai-ng)
         if(oppaiData[1] !== 0 && combo > oppaiData[1]) {
@@ -120,7 +120,7 @@ function processReplayData(map, deep) {
         processedReplays[data.ReplayHash] = {
             replayHash: data.ReplayHash,
             beatmap_id: map.beatmap_id.toString(),
-            beatmapset_id: map.beatmapset_id.toString(),
+            beatmapset_id: map.beatmapset_id,
             accuracy: accuracy,
             grade: getGrade(data, accuracy),
             misses: data.CountMiss,
@@ -129,10 +129,10 @@ function processReplayData(map, deep) {
             mods: data.Mods.split(', '),
             mode: data.GameMode,
             name: map.name,
-            combo: parseInt(data.Combo),
-            max_combo: parseInt(oppaiData[1]),
-            pp: Math.round(oppaiData[0]),
-            max_pp: Math.round(oppaiData[2])
+            combo: data.Combo,
+            max_combo: oppaiData[1],
+            pp: oppaiData[0],
+            max_pp: oppaiData[2]
         };
     });
 }

@@ -1,32 +1,3 @@
-table {
-    border-collapse: collapse;
-}
-
-tr, td, input {
-    text-align: center;
-}
-
-td {
-    max-width: 200px;
-}
-
-input {
-    border: none;
-}
-
-.filter {
-    width: 60px;
-    border: solid 2px deepskyblue;
-}
-
-#dateMin, #dateMax {
-    width: 140px;
-}
-
-#mapName {
-    width: 200px;
-}
-
 #showmore {
     position: absolute;
     width: 95%;

@@ -96,13 +96,16 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         pp_params.n50 = n50;
         pp_params.nmiss = nmiss;
 
+        struct pp_calc pp_max;
         //b_ppv2(&map, &pp, stars.aim, stars.speed, mods);
         b_ppv2p(&map, &pp, &pp_params);
+        b_ppv2(&map, &pp_max, stars.aim, stars.speed, mods);
         int32_t max_combo = b_max_combo(&map);
-        Local<Array> result_list = Array::New(isolate, 2);
+        Local<Array> result_list = Array::New(isolate, 3);
 
         result_list->Set(0, Number::New(isolate, pp.total));
         result_list->Set(1, Number::New(isolate, max_combo));
+        result_list->Set(2, Number::New(isolate, pp_max.total));
 
         fclose(mapFile);
 

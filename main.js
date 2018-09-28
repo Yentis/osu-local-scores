@@ -1,12 +1,9 @@
-const fs = require('fs');
-const https = require('https');
 const {app, BrowserWindow, Menu, ipcMain} =  require('electron');
 const url = require('url');
 const path = require('path');
 const Store = require('electron-store');
 const store = new Store();
 const edge = require('electron-edge-js');
-const util = require('util');
 const EventEmitter = require('events');
 const {GetPP} = require('./build/Release/addon');
 const {execSync} = require('child_process');
@@ -43,8 +40,6 @@ const modText = {
 
 let pressedCancel = false;
 let csharpPath, processedReplays, settings, globalError, getScores;
-
-//console.log(GetPP("C:\\Usefdsfds    rs\\Yentl-PC\\AppDatdsfsda\\Local\\osu!\\Songs\\579451 USAO - Extra Mode\\USAO - Extra Mode (_MiaoFUuU_) [Rhythm Crisis].osu", modTable.DoubleTime, 1361, 10, 0, 1));
 
 //process.env.NODE_ENV = 'production';
 
@@ -115,6 +110,12 @@ function processReplayData(map, deep) {
 
         let accuracy = getAccuracy(data);
         let oppaiData = getOppaiData(map.path, data.Mods, data.Combo, data.Count100, data.Count50, data.CountMiss, data.GameMode);
+        let combo = parseInt(data.Combo);
+
+        //if combo is somehow larger than max combo let's just assume that our combo is an FC (problem with oppai-ng)
+        if(oppaiData[1] !== 0 && combo > oppaiData[1]) {
+            oppaiData[1] = combo;
+        }
 
         processedReplays[data.ReplayHash] = {
             replayHash: data.ReplayHash,
@@ -130,7 +131,8 @@ function processReplayData(map, deep) {
             name: map.name,
             combo: parseInt(data.Combo),
             max_combo: parseInt(oppaiData[1]),
-            pp: parseFloat(oppaiData[0]).toFixed(2)
+            pp: Math.round(oppaiData[0]),
+            max_pp: Math.round(oppaiData[2])
         };
     });
 }
@@ -209,6 +211,7 @@ function getGrade(replay, accuracy){
 function getOppaiData(path, mods, combo, count100, count50, countmiss, gamemode){
     let pp = 0;
     let max_combo = 0;
+    let max_pp = 0;
 
     if(gamemode === 'Standard' || gamemode === 'Taiko') {
         let modBits = modsToBit(mods);
@@ -221,14 +224,15 @@ function getOppaiData(path, mods, combo, count100, count50, countmiss, gamemode)
 
         pp = oppaiData[0];
         max_combo = oppaiData[1];
+        max_pp = oppaiData[2];
     }
 
-    return [pp, max_combo];
+    return [pp, max_combo, max_pp];
 }
 
 function processLargeArray(array, chunk, deep) {
     let index = 0;
-    let timeoutLength = 50;
+    let timeoutLength = chunk;
     if(!deep) {
         timeoutLength = 1;
     }
@@ -309,9 +313,11 @@ function makeReplayList(){
                 let currentReplay = processedReplays[key];
                 let beatmapid = currentReplay.beatmap_id;
 
-                if (!replayList[beatmapid] || (replayList[beatmapid] && replayList[beatmapid].score < currentReplay.score)) {
-                    replayList[beatmapid] = currentReplay;
+                if(!replayList[beatmapid]) {
+                    replayList[beatmapid] = [];
                 }
+
+                replayList[beatmapid].push(currentReplay);
             }
         }
 

@@ -12,47 +12,28 @@
     <thead>
         <tr>
             <th id="showamount"></th>
-            <th>Name</th>
-            <th>Gamemode</th>
-            <th>Beatmap ID</th>
-            <th>Score</th>
-            <th>Grade</th>
-            <th>Accuracy</th>
-            <th>Misses</th>
-            <th>Combo / Max</th>
+            <th><a href="#" id="name">▲ Name</a></th>
+            <th><a href="#" id="mode">Gamemode</a></th>
+            <th><a href="#" id="beatmap_id">Beatmap ID</a></th>
+            <th><a href="#" id="score">Score</a></th>
+            <th><a href="#" id="grade">Grade</a></th>
+            <th><a href="#" id="accuracy">Accuracy</a></th>
+            <th><a href="#" id="misses">Misses</a></th>
+            <th><a href="#" id="combo">Combo / Max</a></th>
             <th>Mods</th>
-            <th>Date</th>
-            <th>PP / Max</th>
+            <th><a href="#" id="timestamp">Date</a></th>
+            <th><a href="#" id="pp">PP</a> / <a href="#" id="max_pp">Max</a></th>
         </tr>
         <tr>
-            <td>
-                <label>Order by</label>
-                <select id="orderType">
-                    <option value="name">Name</option>
-                    <option value="score">Score</option>
-                    <option value="grade">Grade</option>
-                    <option value="accuracy">Accuracy</option>
-                    <option value="misses">Misses</option>
-                    <option value="combo">Combo %</option>
-                    <option value="mode">Mode</option>
-                    <option value="beatmap_id">Beatmap ID</option>
-                    <option value="timestamp">Date</option>
-                    <option value="pp">PP</option>
-                    <option value="max_pp">Max PP</option>
-                </select>
-                <select id="orderDirection">
-                    <option value="asc">Asc</option>
-                    <option value="desc">Desc</option>
-                </select>
-            </td>
+            <td></td>
             <td>
                 <input type="text" id="mapName" placeholder="Search">
             </td>
             <td>
-                <input type="text" id="mode" placeholder="Mode">
+                <input type="text" id="modeName" placeholder="Mode">
             </td>
             <td>
-                <input type="number" id="beatmap_id" placeholder="ID">
+                <input type="number" id="beatmap_idNum" placeholder="ID">
             </td>
             <td>
                 <input type="number" id="scoreMin" placeholder="Min">

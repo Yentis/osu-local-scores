@@ -51,8 +51,8 @@ $(document).ready(function () {
         comboMax: '',
         gradeMin: 'D',
         gradeMax: 'SS',
-        mode: '',
-        beatmap_id: '',
+        modeName: '',
+        beatmap_idNum: '',
         mapName: '',
         dateMin: '',
         dateMax: '',
@@ -67,6 +67,7 @@ $(document).ready(function () {
         orderDirection: 'asc',
         comboFilterType: 'percent'
     };
+    let lastFilter = 'name';
     let replayList, waitingTypeMods;
 
     const numberWithCommas = function(x){
@@ -75,6 +76,7 @@ $(document).ready(function () {
 
     $('select').formSelect();
     $('.datepicker').datepicker();
+    $('.collapsible').collapsible();
 
     function sortList(list, orderType, orderDirection){
         orderType = orderType || filters.orderType;
@@ -87,7 +89,7 @@ $(document).ready(function () {
                 b = c;
             }
 
-            if(orderType === 'name' || orderType === 'mode') {
+            if(orderType === 'name' || orderType === 'modeName') {
                 return a[orderType].localeCompare(b[orderType]);
             } else if(orderType === 'timestamp') {
                 return getDate(a[orderType]) - getDate(b[orderType]);
@@ -113,7 +115,7 @@ $(document).ready(function () {
             && (filters.accuracyMax === '' || replay.accuracy <= filters.accuracyMax)
             && replay.misses >= filters.missesMin
             && (filters.missesMax === '' || replay.misses <= filters.missesMax)
-            && (filters.mode === '' || replay.mode.toLowerCase() === filters.mode.toLowerCase())
+            && (filters.modeName === '' || replay.mode.toLowerCase() === filters.modeName.toLowerCase())
             && (filters.dateMin === '' || (getDate(replay.timestamp) - new Date(filters.dateMin)) >= 0)
             && (filters.dateMax === '' || (getDate(replay.timestamp) - new Date(filters.dateMax)) <= 0)
             && (filters.excludedMods.length === 0 || hasNoMod(filters.excludedMods, replay.mods))
@@ -169,7 +171,7 @@ $(document).ready(function () {
 
     function addHtml(replay) {
         let html = '';
-        html += '<tr hidden style="border: 2px solid;">';
+        html += '<tr hidden>';
         html += '<td><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" height="60"></td>';
         html += '<td><a href="osu://b/' + replay.beatmap_id + '">' + replay.name + '</a></td>';
         html += '<td>' + replay.mode + '</td>';
@@ -226,8 +228,8 @@ $(document).ready(function () {
                 regexName = new RegExp('.*' + filters.mapName.toLowerCase() + '.*');
             }
 
-            if(filters.beatmap_id !== '') {
-                regex_id = new RegExp('.*' + filters.beatmap_id + '.*');
+            if(filters.beatmap_idNum !== '') {
+                regex_id = new RegExp('.*' + filters.beatmap_idNum + '.*');
             }
 
             if(applyFilters(replay, regexName, regex_id)) {
@@ -307,6 +309,26 @@ $(document).ready(function () {
 
     $(document).on('change', 'select', function () {
         filters[this.id] = this.options[this.selectedIndex].value;
+        updateReplayList();
+    });
+
+    $(document).on('click', 'a:not(td a)', function () {
+        let firstChar = this.innerHTML[0];
+        if(firstChar !== '▲' && firstChar !== '▼') {
+            let lastFilterElem = $('#' + lastFilter);
+            lastFilterElem.html(lastFilterElem.html().substring(1, lastFilterElem.html().length));
+            lastFilter = this.id;
+            this.innerHTML = '▲ ' + this.innerHTML;
+            filters.orderDirection = 'asc';
+        } else if(firstChar === '▲') {
+            this.innerHTML = '▼ ' + this.innerHTML.substring(1, this.innerHTML.length);
+            filters.orderDirection = 'desc';
+        } else {
+            this.innerHTML = '▲ ' + this.innerHTML.substring(1, this.innerHTML.length);
+            filters.orderDirection = 'asc';
+        }
+
+        filters.orderType = this.id;
         updateReplayList();
     });
 

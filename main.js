@@ -295,33 +295,18 @@ app.on('ready', function () {
             app.quit();
         });
 
-        mainWindow.webContents.once('dom-ready', makeReplayList);
+        mainWindow.webContents.once('dom-ready', sendReplayList);
 
         const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
         Menu.setApplicationMenu(mainMenu);
     }
 });
 
-function makeReplayList(){
+function sendReplayList(){
     if (!processedReplays || Object.keys(processedReplays).length === 0 && processedReplays.constructor === Object) {
         mainWindow.webContents.send('message', 'No replays found, please process them first. (File -> Process Replays)');
     } else {
-        let replayList = [];
-
-        for (let key in processedReplays) {
-            if (processedReplays.hasOwnProperty(key)) {
-                let currentReplay = processedReplays[key];
-                let beatmapid = currentReplay.beatmap_id;
-
-                if(!replayList[beatmapid]) {
-                    replayList[beatmapid] = [];
-                }
-
-                replayList[beatmapid].push(currentReplay);
-            }
-        }
-
-        mainWindow.webContents.send('replaylist', replayList);
+        mainWindow.webContents.send('replaylist', processedReplays);
     }
 }
 
@@ -394,7 +379,7 @@ dataEmitter.on('done', function () {
         mainWindow.webContents.send('message', 'Your replays have been processed successfully.');
     }
     processReplayWindow.close();
-    makeReplayList();
+    sendReplayList();
 });
 
 function createSettingsWindow(){

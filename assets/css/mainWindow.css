@@ -7,6 +7,14 @@ thead tr, tbody tr {
     border-bottom: 2px solid;
 }
 
+.scoreDisplay {
+    cursor: pointer;
+}
+
+.otherScores {
+    background-color: lightgray;
+}
+
 #showmore {
     position: absolute;
     width: 95%;

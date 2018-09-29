@@ -68,7 +68,7 @@ $(document).ready(function () {
         comboFilterType: 'percent'
     };
     let lastFilter = 'name';
-    let replayList, waitingTypeMods;
+    let replayList, mapList, waitingTypeMods;
 
     const numberWithCommas = function(x){
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -78,30 +78,35 @@ $(document).ready(function () {
     $('.datepicker').datepicker();
     $('.collapsible').collapsible();
 
-    function sortList(list, orderType, orderDirection){
-        orderType = orderType || filters.orderType;
-        orderDirection = orderDirection || filters.orderDirection;
-
+    function sortList(list, replayObj, orderType = filters.orderType, orderDirection = filters.orderDirection){
         return list.sort(function (a, b) {
-            if(orderDirection === 'desc') {
-                let c = a;
-                a = b;
-                b = c;
-            }
-
-            if(orderType === 'name' || orderType === 'modeName') {
-                return a[orderType].localeCompare(b[orderType]);
-            } else if(orderType === 'timestamp') {
-                return getDate(a[orderType]) - getDate(b[orderType]);
-            } else if(orderType === 'combo') {
-                let aPercent = a[orderType] / a.max_combo || 0;
-                let bPercent = b[orderType] / b.max_combo || 0;
-
-                return aPercent - bPercent;
+            if(replayObj) {
+                return getOrder(replayObj[a], replayObj[b], orderType, orderDirection);
             } else {
-                return a[orderType] - b[orderType];
+                return getOrder(a, b, orderType, orderDirection);
             }
         });
+    }
+
+    function getOrder(a, b, orderType, orderDirection) {
+        if(orderDirection === 'desc') {
+            let c = a;
+            a = b;
+            b = c;
+        }
+
+        if(orderType === 'name' || orderType === 'modeName') {
+            return a[orderType].localeCompare(b[orderType]);
+        } else if(orderType === 'timestamp') {
+            return getDate(a[orderType]) - getDate(b[orderType]);
+        } else if(orderType === 'combo') {
+            let aPercent = a[orderType] / a.max_combo || 0;
+            let bPercent = b[orderType] / b.max_combo || 0;
+
+            return aPercent - bPercent;
+        } else {
+            return a[orderType] - b[orderType];
+        }
     }
 
     function applyFilters(replay, regexName, regex_id){
@@ -171,7 +176,6 @@ $(document).ready(function () {
 
     function addHtml(replay) {
         let html = '';
-        html += '<tr hidden>';
         html += '<td><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" height="60"></td>';
         html += '<td><a href="osu://b/' + replay.beatmap_id + '">' + replay.name + '</a></td>';
         html += '<td>' + replay.mode + '</td>';
@@ -202,40 +206,60 @@ $(document).ready(function () {
         return modString;
     }
 
+    function sortMapReplays(array) {
+        if(validScoreSort.indexOf(filters.orderType) > -1) {
+            return sortList(array);
+        } else {
+            return sortList(array, null, 'score', 'desc');
+        }
+    }
+
     function updateReplayList(){
         let html = '<tbody>';
-        let displayList = [];
 
         filters.amountToShow = baseShow;
 
         //sort the scores
-        for(let i = 0; i < replayList.length; i++) {
-            //no point filtering on types where all values are the same
-            if(validScoreSort.indexOf(filters.orderType) > -1)
-                replayList[i] = sortList(replayList[i]);
-            else
-                replayList[i] = sortList(replayList[i], 'score');
+        let replayOrder = Object.keys(replayList);
+        replayOrder = sortList(replayOrder, replayList);
 
-            displayList.push(replayList[i][0]);
-        }
+        mapList = {};
+        replayOrder.forEach(function (key) {
+            let curReplay = replayList[key];
+            let curMapList = mapList[curReplay.name];
 
-        //sort the list being displayed
-        displayList = sortList(displayList);
-        displayList.forEach(function (replay) {
-            let regexName, regex_id;
-
-            if(filters.mapName !== '') {
-                regexName = new RegExp('.*' + filters.mapName.toLowerCase() + '.*');
-            }
-
-            if(filters.beatmap_idNum !== '') {
-                regex_id = new RegExp('.*' + filters.beatmap_idNum + '.*');
-            }
-
-            if(applyFilters(replay, regexName, regex_id)) {
-                html += addHtml(replay);
+            if(curMapList) {
+                curMapList.push(curReplay);
+                mapList[curReplay.name] = sortMapReplays(curMapList);
+            } else {
+                mapList[curReplay.name] = [curReplay];
             }
         });
+
+        //display the scores
+        for(let key in mapList) {
+            if(mapList.hasOwnProperty(key)) {
+                let map = mapList[key];
+                let regexName, regex_id;
+
+                if(filters.mapName !== '') {
+                    regexName = new RegExp('.*' + filters.mapName.toLowerCase() + '.*');
+                }
+
+                if(filters.beatmap_idNum !== '') {
+                    regex_id = new RegExp('.*' + filters.beatmap_idNum + '.*');
+                }
+
+                if(applyFilters(map[0], regexName, regex_id)) {
+                    if(map.length > 1) {
+                        html += '<tr hidden class="scoreDisplay">';
+                    } else {
+                        html += '<tr hidden>';
+                    }
+                    html += addHtml(map[0]);
+                }
+            }
+        }
 
         html += '</tbody>';
 
@@ -295,6 +319,27 @@ $(document).ready(function () {
         e.preventDefault();
         filters.amountToShow += 100;
         unhideElements();
+    });
+
+    $(document).on('click', '.scoreDisplay', function () {
+        $('.otherScores').remove();
+        if(this.classList.contains('showingAll')) {
+            this.classList.remove('showingAll');
+        } else {
+            $('.showingAll').removeClass('showingAll');
+            this.classList.add('showingAll');
+
+            let name = this.children[1].children[0].innerHTML;
+            let html = '';
+
+            //we start at 1 because the first score is already displayed
+            for(let i = 1; i < mapList[name].length; i++) {
+                html += '<tr class="otherScores">';
+                html += addHtml(mapList[name][i]);
+            }
+
+            $(this).after(html);
+        }
     });
 
     $(document).on('keyup', 'input:not(#dateMin, #dateMax)', function () {

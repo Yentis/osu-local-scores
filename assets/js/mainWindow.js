@@ -226,13 +226,13 @@ $(document).ready(function () {
         mapList = {};
         replayOrder.forEach(function (key) {
             let curReplay = replayList[key];
-            let curMapList = mapList[curReplay.name];
+            let curMapList = mapList[curReplay.identifier];
 
             if(curMapList) {
                 curMapList.push(curReplay);
-                mapList[curReplay.name] = sortMapReplays(curMapList);
+                mapList[curReplay.identifier] = sortMapReplays(curMapList);
             } else {
-                mapList[curReplay.name] = [curReplay];
+                mapList[curReplay.identifier] = [curReplay];
             }
         });
 
@@ -252,9 +252,9 @@ $(document).ready(function () {
 
                 if(applyFilters(map[0], regexName, regex_id)) {
                     if(map.length > 1) {
-                        html += '<tr hidden class="scoreDisplay">';
+                        html += '<tr hidden class="scoreDisplay ' + map[0].identifier + '">';
                     } else {
-                        html += '<tr hidden>';
+                        html += '<tr hidden class="' + map[0].identifier + '">';
                     }
                     html += addHtml(map[0]);
                 }
@@ -329,13 +329,13 @@ $(document).ready(function () {
             $('.showingAll').removeClass('showingAll');
             this.classList.add('showingAll');
 
-            let name = this.children[1].children[0].innerHTML;
+            let identifier = this.classList[1];
             let html = '';
 
             //we start at 1 because the first score is already displayed
-            for(let i = 1; i < mapList[name].length; i++) {
+            for(let i = 1; i < mapList[identifier].length; i++) {
                 html += '<tr class="otherScores">';
-                html += addHtml(mapList[name][i]);
+                html += addHtml(mapList[identifier][i]);
             }
 
             $(this).after(html);

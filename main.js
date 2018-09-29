@@ -118,6 +118,7 @@ function processReplayData(map, deep) {
         }
 
         processedReplays[data.ReplayHash] = {
+            identifier: map.path.split('Songs\\')[1].replace(/ /g, ''),
             replayHash: data.ReplayHash,
             beatmap_id: map.beatmap_id.toString(),
             beatmapset_id: map.beatmapset_id,

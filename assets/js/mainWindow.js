@@ -237,24 +237,24 @@ $(document).ready(function () {
 
         filters.amountToShow = baseShow;
 
-        //sort the scores
-        let replayOrder = Object.keys(replayList);
-        replayOrder = sortList(replayOrder, replayList);
-
+        //add scores to maps and sort them by valid filter or score
         mapList = {};
-        replayOrder.forEach(function (key) {
-            let curReplay = replayList[key];
-            let curMapList = mapList[curReplay.identifier];
+        for(let key in replayList) {
+            if(replayList.hasOwnProperty(key)) {
+                let curReplay = replayList[key];
+                let curMapList = mapList[curReplay.identifier];
 
-            if(curMapList) {
-                curMapList.push(curReplay);
-                mapList[curReplay.identifier] = sortMapReplays(curMapList);
-            } else {
-                mapList[curReplay.identifier] = [curReplay];
+                if(curMapList) {
+                    curMapList.push(curReplay);
+                    mapList[curReplay.identifier] = sortMapReplays(curMapList);
+                } else {
+                    mapList[curReplay.identifier] = [curReplay];
+                }
             }
-        });
+        }
 
-        //display the scores
+        //get scores to display
+        let displayList = [];
         for(let key in mapList) {
             if(mapList.hasOwnProperty(key)) {
                 let map = mapList[key];
@@ -271,15 +271,26 @@ $(document).ready(function () {
                 let highestValidIndex = getValidScore(key, regexName, regex_id);
 
                 if(highestValidIndex !== null) {
-                    if(map.length > 1) {
-                        html += '<tr hidden class="scoreDisplay ' + key + ' ' + highestValidIndex + '">';
-                    } else {
-                        html += '<tr hidden class="' + key + '">';
-                    }
-                    html += addHtml(map[highestValidIndex]);
+                    let toShowMap = map[highestValidIndex];
+                    toShowMap.index = highestValidIndex;
+
+                    displayList.push(toShowMap);
                 }
             }
         }
+
+        //sort the scores
+        displayList = sortList(displayList);
+
+        //display the scores
+        displayList.forEach((score) => {
+            if(mapList[score.identifier].length > 1) {
+                html += '<tr hidden class="scoreDisplay ' + score.identifier + ' ' + score.index + '">';
+            } else {
+                html += '<tr hidden class="' + score.identifier + '">';
+            }
+            html += addHtml(score);
+        });
 
         html += '</tbody>';
 
@@ -291,12 +302,11 @@ $(document).ready(function () {
     function getValidScore(identifier, regexName, regex_id) {
         let highestValidIndex = null;
 
-        mapList[identifier].forEach(function (otherScore, index) {
+        mapList[identifier].forEach(function (score, index) {
             if(highestValidIndex !== null && highestValidIndex < index) {
                 return;
             }
-
-            let filtersFit = applyFilters(otherScore, regexName, regex_id);
+            let filtersFit = applyFilters(score, regexName, regex_id);
 
             if(filtersFit) {
                 highestValidIndex = index;

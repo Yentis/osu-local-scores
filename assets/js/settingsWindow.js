@@ -1,7 +1,6 @@
 const electron = require('electron');
-const {ipcRenderer, shell} = electron;
+const {ipcRenderer} = electron;
 const {dialog} = electron.remote;
-const fs = require('fs');
 let saveButton = document.getElementById('save');
 
 document.getElementById('settings').addEventListener('submit', function (e) {
@@ -15,9 +14,7 @@ document.getElementById('settings').addEventListener('submit', function (e) {
 
 document.getElementById('btn-chooseFolder').addEventListener('click', function () {
     dialog.showOpenDialog({properties: ['openDirectory']},(dirname) => {
-        if(dirname === undefined) {
-            console.log('No dir selected');
-        } else {
+        if(dirname !== undefined) {
             document.getElementById('osuPath').value = dirname[0];
         }
     })

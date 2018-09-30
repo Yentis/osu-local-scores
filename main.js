@@ -239,7 +239,6 @@ ipcMain.on('mods', function (e) {
 });
 
 ipcMain.on('modsResult', function (e, modsResult) {
-    console.log(modsResult);
     mainWindow.webContents.send('modsResult', modsResult);
     modsWindow.close();
 });

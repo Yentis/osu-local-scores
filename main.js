@@ -146,7 +146,7 @@ function createProcessReplayWindow(deep){
 }
 
 function startWorker(data, deep){
-    let worker = fork('worker.js');
+    let worker = fork(path.resolve(__dirname, 'worker.js'));
     worker.send({mapList: data, deep: deep, replays: processedReplays});
 
     worker.on('message', (message) => {
@@ -287,7 +287,7 @@ if(process.env.NODE_ENV !== 'production') {
             {
                 label: 'Toggle DevTools',
                 accelerator: 'Ctrl+I',
-                click(item, focusedWindow){
+                click(item, focusedWindow) {
                     focusedWindow.toggleDevTools();
                 }
             },

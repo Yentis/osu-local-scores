@@ -195,9 +195,17 @@ $(document).ready(function () {
         html += '<td>' + replay.combo + ' / ' + (replay.max_combo === 0 ? '?' : replay.max_combo) + '</td>';
         html += '<td>' + getModString(replay) + '</td>';
         html += '<td style="width: 100px">' + replay.timestamp + '</td>';
-        html += '<td>' + replay.pp.toFixed(2) + ' / ' + replay.max_pp.toFixed(2) + '</td>';
+        html += '<td>' + getPP(replay.pp) + ' / ' + getPP(replay.max_pp) + '</td>';
         html += '</tr>';
         return html;
+    }
+
+    function getPP(pp) {
+        if(pp == null) {
+            return '∞';
+        } else {
+            return pp.toFixed(2);
+        }
     }
 
     function getModString(replay) {
@@ -258,13 +266,15 @@ $(document).ready(function () {
                     regex_id = new RegExp('.*' + filters.beatmap_idNum + '.*');
                 }
 
-                if(applyFilters(map[0], regexName, regex_id)) {
+                let highestValidIndex = getValidScore(key, regexName, regex_id);
+
+                if(highestValidIndex !== null) {
                     if(map.length > 1) {
-                        html += '<tr hidden class="scoreDisplay ' + map[0].identifier + '">';
+                        html += '<tr hidden class="scoreDisplay ' + key + '">';
                     } else {
-                        html += '<tr hidden class="' + map[0].identifier + '">';
+                        html += '<tr hidden class="' + key + '">';
                     }
-                    html += addHtml(map[0]);
+                    html += addHtml(map[highestValidIndex]);
                 }
             }
         }
@@ -274,6 +284,24 @@ $(document).ready(function () {
         $('tbody').remove();
         $('#replayTable').append(html);
         unhideElements();
+    }
+
+    function getValidScore(identifier, regexName, regex_id) {
+        let highestValidIndex = null;
+
+        mapList[identifier].forEach(function (otherScore, index) {
+            if(highestValidIndex && highestValidIndex < index) {
+                return;
+            }
+
+            let filtersFit = applyFilters(otherScore, regexName, regex_id);
+
+            if(filtersFit) {
+                highestValidIndex = index;
+            }
+        });
+
+        return highestValidIndex;
     }
 
     function unhideElements(){

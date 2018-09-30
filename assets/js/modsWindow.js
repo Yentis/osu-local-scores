@@ -6,6 +6,12 @@ const nextMod = {
     'Doubletime': 'Nightcore',
     'Nightcore': 'Doubletime-lastmod'
 };
+const nextId = {
+    'SuddenDeath': 'Perfect',
+    'Perfect': 'SuddenDeath-lastmod',
+    'DoubleTime': 'Nightcore',
+    'Nightcore': 'DoubleTime-lastmod'
+};
 let curGamemode = 'standard';
 
 $(document).on('change', 'select', setGamemode);
@@ -14,6 +20,7 @@ $(document).on('click', '.mods', function (e) {
     e.preventDefault();
     let elem = $(this);
     let nextModName = nextMod[this.value];
+    let nextModId = nextId[this.id];
 
     if(!elem.hasClass('selected')) {
         elem.addClass('selected');
@@ -21,12 +28,14 @@ $(document).on('click', '.mods', function (e) {
         return;
     }
 
-    if(nextModName) {
+    if(nextModName && nextModId) {
         let split = nextModName.split('-');
+        let splitId = nextModId.split('-');
         if(split[1]) {
             elem.removeClass('selected');
         }
         this.value = split[0];
+        this.id = splitId[0];
     } else {
         elem.removeClass('selected');
     }

@@ -18,6 +18,8 @@ $(document).ready(function () {
         "SuddenDeath":"SD",
         "Perfect": "PF",
         "DoubleTime":"DT",
+        "Nightcore":"NC",
+        "Target":"Target Practice",
         "FadeIn":"FI",
         "Hidden":"HD",
         "Flashlight":"FL",
@@ -270,7 +272,7 @@ $(document).ready(function () {
 
                 if(highestValidIndex !== null) {
                     if(map.length > 1) {
-                        html += '<tr hidden class="scoreDisplay ' + key + '">';
+                        html += '<tr hidden class="scoreDisplay ' + key + ' ' + highestValidIndex + '">';
                     } else {
                         html += '<tr hidden class="' + key + '">';
                     }
@@ -290,7 +292,7 @@ $(document).ready(function () {
         let highestValidIndex = null;
 
         mapList[identifier].forEach(function (otherScore, index) {
-            if(highestValidIndex && highestValidIndex < index) {
+            if(highestValidIndex !== null && highestValidIndex < index) {
                 return;
             }
 
@@ -366,12 +368,14 @@ $(document).ready(function () {
             this.classList.add('showingAll');
 
             let identifier = this.classList[1];
+            let shownIndex = parseInt(this.classList[2]);
             let html = '';
 
-            //we start at 1 because the first score is already displayed
-            for(let i = 1; i < mapList[identifier].length; i++) {
-                html += '<tr class="otherScores">';
-                html += addHtml(mapList[identifier][i]);
+            for(let i = 0; i < mapList[identifier].length; i++) {
+                if(i !== shownIndex) {
+                    html += '<tr class="otherScores">';
+                    html += addHtml(mapList[identifier][i]);
+                }
             }
 
             $(this).after(html);

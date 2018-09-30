@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    const {ipcRenderer} = require('electron');
+    const {ipcRenderer, shell} = require('electron');
     const baseShow = 100;
     const grade = {
         5: 'SS',
@@ -120,8 +120,8 @@ $(document).ready(function () {
     }
 
     function applyFilters(replay, regexName, regex_id){
-        return !!(replay.grade >= gradeToIndex(filters.gradeMin)
-            && (filters.gradeMax === '' || replay.grade <= gradeToIndex(filters.gradeMax))
+        return !!((gradeToIndex(filters.gradeMin.toUpperCase()) != null && replay.grade >= gradeToIndex(filters.gradeMin.toUpperCase()))
+            && (filters.gradeMax === '' || (gradeToIndex(filters.gradeMax.toUpperCase()) && replay.grade <= gradeToIndex(filters.gradeMax.toUpperCase())))
             && (regex_id == null || replay.beatmap_id.match(regex_id))
             && (regexName == null || replay.name.toLowerCase().match(regexName))
             && replay.score >= filters.scoreMin
@@ -185,8 +185,15 @@ $(document).ready(function () {
     }
 
     function addHtml(replay) {
+        let mode = replay.mode;
+        if(mode === 'CatchTheBeat') {
+            mode = 'fruits';
+        } else if(mode === 'Standard') {
+            mode = 'osu';
+        }
+
         let html = '';
-        html += '<td><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" height="60"></td>';
+        html += '<td><a href="https://osu.ppy.sh/beatmapsets/' + replay.beatmapset_id + '#' + mode + '/' + replay.beatmap_id + '"><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" height="60"></a></td>';
         html += '<td><a href="osu://b/' + replay.beatmap_id + '">' + replay.name + '</a></td>';
         html += '<td>' + replay.mode + '</td>';
         html += '<td>' + replay.beatmap_id + '</td>';
@@ -394,6 +401,8 @@ $(document).ready(function () {
 
     $(document).on('click', 'td a', function (e) {
         e.stopPropagation();
+        e.preventDefault();
+        shell.openExternal(this.href);
     });
 
     $(document).on('keyup', 'input:not(#dateMin, #dateMax)', function () {

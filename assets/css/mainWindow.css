@@ -7,12 +7,20 @@ thead tr, tbody tr {
     border-bottom: 2px solid;
 }
 
+tbody tr:hover {
+    background-color: lightgray;
+}
+
+td a img:hover {
+    border: 1px solid deepskyblue;
+}
+
 .scoreDisplay {
     cursor: pointer;
 }
 
 .otherScores {
-    background-color: lightgray;
+    background-color: darkgray;
 }
 
 #showmore {

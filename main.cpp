@@ -2,7 +2,7 @@
 #include <nan.h>
 #include <errno.h>
 #include <string>
-#include "../../assets/c/oppai.c"
+#include "./oppai.c"
 
 namespace demo {
 

@@ -2,9 +2,10 @@
   "targets": [
     {
       "include_dirs": [
-        "<!(node -e \"require('nan')\")"
+        "<!(node -e \"require('nan')\")",
+		"assets/c/"
       ],
-      "target_name": "addon",
+      "target_name": "ppCalculator",
       "sources": [ "main.cpp" ]
     }
   ]

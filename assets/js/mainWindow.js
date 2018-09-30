@@ -38,7 +38,13 @@ $(document).ready(function () {
         "Key8":"8K",
         "Key9":"9K"
     };
-    const validScoreSort = ['score', 'accuracy', 'misses', 'combo', 'date', 'pp'];
+    const mode = {
+        "Standard": 0,
+        "Taiko": 1,
+        "CatchTheBeat": 2,
+        "Mania": 3
+    };
+    const invalidScoreSort = ['name', 'beatmap_id'];
 
     let filters = {
         scoreMin: 0,
@@ -95,7 +101,7 @@ $(document).ready(function () {
             b = c;
         }
 
-        if(orderType === 'name' || orderType === 'modeName') {
+        if(orderType === 'name') {
             return a[orderType].localeCompare(b[orderType]);
         } else if(orderType === 'timestamp') {
             return getDate(a[orderType]) - getDate(b[orderType]);
@@ -104,6 +110,8 @@ $(document).ready(function () {
             let bPercent = b[orderType] / b.max_combo || 0;
 
             return aPercent - bPercent;
+        } else if(orderType === 'mode') {
+            return mode[a[orderType]] - mode[b[orderType]];
         } else {
             return a[orderType] - b[orderType];
         }
@@ -207,7 +215,7 @@ $(document).ready(function () {
     }
 
     function sortMapReplays(array) {
-        if(validScoreSort.indexOf(filters.orderType) > -1) {
+        if(invalidScoreSort.indexOf(filters.orderType) === -1) {
             return sortList(array);
         } else {
             return sortList(array, null, 'score', 'desc');
@@ -342,6 +350,10 @@ $(document).ready(function () {
         }
     });
 
+    $(document).on('click', 'td a', function (e) {
+        e.stopPropagation();
+    });
+
     $(document).on('keyup', 'input:not(#dateMin, #dateMax)', function () {
         filters[this.id] = this.value;
         updateReplayList();
@@ -357,7 +369,7 @@ $(document).ready(function () {
         updateReplayList();
     });
 
-    $(document).on('click', 'a:not(td a)', function () {
+    $(document).on('click', 'th a', function () {
         let firstChar = this.innerHTML[0];
         if(firstChar !== '▲' && firstChar !== '▼') {
             let lastFilterElem = $('#' + lastFilter);

@@ -8,5 +8,5 @@ document.getElementById('cancel').addEventListener('click', function (e) {
 
 ipcRenderer.on('progress', function (e, data) {
     document.getElementById('currentReplay').innerHTML = 'Progress: ' + data.index + ' of ' + data.total;
-    document.getElementById('progressBar').value = document.getElementById('progressBar').value + 1;
+    document.getElementById('progressBar').value = (data.index / data.total) * 100;
 });

@@ -1,6 +1,6 @@
 {
   "name": "osu-local-scores",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "read local scores",
   "main": "main.js",
   "author": "Yentis",
@@ -18,11 +18,16 @@
     "compile": "node-gyp rebuild",
     "compile-debug": "node-gyp rebuild --debug",
     "start": "electron .",
-    "package-win": "electron-packager . --overwrite --asar.unpackDir=node_modules/edge-cs/** --extraResource=assets/csharp/ --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=Yentis --version-string.FileDescription=oRM --version-string.ProductName=\"osu! Replay Manager\""
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "devDependencies": {
     "electron": "^2.0.10",
-    "electron-packager": "^12.1.2"
+    "electron-builder": "^20.28.4"
   },
-  "gypfile": true
+  "gypfile": true,
+  "build": {
+    "appId": "osu.local.scores",
+	"asarUnpack": "assets/csharp/"
+  }
 }

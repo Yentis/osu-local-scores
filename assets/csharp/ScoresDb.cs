@@ -1,10 +1,8 @@
-using OppaiSharp;
 using osu_database_reader.BinaryFiles;
 using osu_database_reader.Components.Beatmaps;
 using osu_database_reader.Components.Player;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 public class Startup

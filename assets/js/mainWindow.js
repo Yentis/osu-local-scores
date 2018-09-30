@@ -390,7 +390,7 @@ $(document).ready(function () {
     });
 
     ipcRenderer.on('message', function (e, message) {
-        document.getElementById('message').innerHTML = message;
+        $('#message').html(message).delay(5000).fadeOut();
     });
 
     ipcRenderer.on('replaylist', function (e, list) {

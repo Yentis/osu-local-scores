@@ -81,6 +81,8 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         p_init(&pstate);
         p_map(&pstate, &map, mapFile);
 
+        fclose(mapFile);
+
         d_init(&stars);
         d_calc(&stars, &map, mods);
 
@@ -105,8 +107,6 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         result_list->Set(0, Number::New(isolate, pp.total));
         result_list->Set(1, Number::New(isolate, max_combo));
         result_list->Set(2, Number::New(isolate, pp_max.total));
-
-        fclose(mapFile);
 
         args.GetReturnValue().Set(result_list);
     }

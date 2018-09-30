@@ -45,7 +45,7 @@ if(cluster.isMaster) {
     const Store = require('electron-store');
     const store = new Store();
     let processedReplays;
-    
+
     //process.env.NODE_ENV = 'production';
 
     if(process.env.NODE_ENV === 'production') {

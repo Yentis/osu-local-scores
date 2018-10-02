@@ -193,7 +193,7 @@ $(document).ready(function () {
         }
 
         let html = '';
-        html += '<td><a href="https://osu.ppy.sh/beatmapsets/' + replay.beatmapset_id + '#' + mode + '/' + replay.beatmap_id + '"><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" onerror="this.src=\'assets/images/image-not-found.png\'" height="60"></a></td>';
+        html += '<td><a href="https://osu.ppy.sh/beatmapsets/' + replay.beatmapset_id + '#' + mode.toLowerCase() + '/' + replay.beatmap_id + '"><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" onerror="this.src=\'assets/images/image-not-found.png\'" height="60"></a></td>';
         html += '<td><a href="osu://b/' + replay.beatmap_id + '">' + replay.name + '</a></td>';
         html += '<td>' + replay.mode + '</td>';
         html += '<td>' + replay.beatmap_id + '</td>';

@@ -145,20 +145,27 @@ function createProcessReplayWindow(deep){
     });
 }
 
-function startWorker(data, deep){
+let processProgress = 0;
+function startWorker(data, deep, startIndex = 0){
     let worker = fork(path.resolve(__dirname, 'worker.js'));
-    worker.send({mapList: data, deep: deep, replays: processedReplays});
+    worker.send({mapList: data, startIndex: startIndex, deep: deep, replays: processedReplays});
 
     worker.on('message', (message) => {
-        let receivedReplays = message.replays;
-
-        if(!receivedReplays) {
-            processReplayWindow.webContents.send('progress', message);
+        if(!message.done) {
+            processReplayWindow.webContents.send('progress', {index: message.index, total: message.total});
+            processedReplays = message.replays;
+            processProgress = message.index;
         } else {
-            processedReplays = receivedReplays;
+            processProgress = 0;
             dataEmitter.emit('done', message.failedReplays);
-
             worker.send('exit');
+        }
+    });
+
+    worker.on('exit', (code) => {
+        //it crashed, create another one
+        if(code !== 0) {
+            startWorker(data, deep, processProgress+1);
         }
     });
 }

@@ -29,19 +29,19 @@ const modText = {
     "SpunOut":"SO"
 };
 
-let processedReplays
+let processedReplays;
 let failedReplays = [];
 
 process.on('message', (msg) => {
     if(msg.replays) {
         processedReplays = msg.replays;
 
-        msg.mapList.forEach(function (map, index) {
-            processReplayData(map, msg.deep);
-            process.send({index: index+1, total: msg.mapList.length});
-        });
+        for(let i = msg.startIndex; i < msg.mapList.length; i++) {
+            processReplayData(msg.mapList[i], msg.deep);
+            process.send({index: i+1, total: msg.mapList.length, replays: processedReplays});
+        }
 
-        process.send({replays: processedReplays, failedReplays: failedReplays});
+        process.send({done: true, failedReplays: failedReplays});
     } else if(msg === 'exit') {
         process.exit();
     }
@@ -88,17 +88,17 @@ function oppaiCmd(cmd){
 }
 
 function cmdBuilder(path, mods, count100, count50, countmiss, combo, gamemode){
-    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x' + ' -m' + gamemode;
+    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
 }
 
 function processReplayData(map, deep) {
-    map.replays.forEach(function (data) {
+    map.replays.forEach(function (data, index) {
         if(!deep && processedReplays[data.ReplayHash]) {
             return;
         }
 
         let accuracy = getAccuracy(data);
-        let oppaiData = getOppaiData(map.path, data.Mods, data.Combo, data.Count100, data.Count50, data.CountMiss, data.GameMode);
+        let oppaiData = getOppaiData(map, data, index);
         let combo = data.Combo;
 
         //if combo is somehow larger than max combo let's just assume that our combo is an FC (problem with oppai-ng)
@@ -198,29 +198,26 @@ function getGrade(replay, accuracy){
     }
 }
 
-function getOppaiData(path, mods, combo, count100, count50, countmiss, gamemode){
+function getOppaiData(map, data, index){
     let pp = 0;
     let max_combo = 0;
     let max_pp = 0;
 
-    if(gamemode === 'Standard' || gamemode === 'Taiko') {
-        if(gamemode === 'Standard') {
-            gamemode = 0;
-        } else {
-            gamemode = 1;
-        }
-
-        let modBits = modsToBit(mods);
-        let oppaiData = GetPP(path, modBits, combo, count100, count50, countmiss, gamemode);
+    if(data.GameMode === 'Standard' || data.GameMode === 'Taiko') {
+        let modBits = modsToBit(data.Mods);
+        let oppaiData = GetPP(map.path, modBits, data.Combo, data.Count100, data.Count50, data.CountMiss,
+            data.GameMode === 'Standard' ? 0 : 1,
+            data.GameMode === 'Taiko' ? map.starRatingsTaiko[index] : 0,
+            map.hitCircles, map.overallDifficulty);
 
         if(!Array.isArray(oppaiData)) {
             console.log('Failed to get oppaiData from library.');
-            let textMods = modsToText(mods);
-            oppaiData = oppaiCmd(cmdBuilder(path, textMods, combo, count100, count50, countmiss, gamemode));
+            let textMods = modsToText(data.Mods);
+            oppaiData = oppaiCmd(cmdBuilder(map.path, textMods, data.Combo, data.Count100, data.Count50, data.CountMiss));
 
             if(!oppaiData || oppaiData[0] <= -1) {
                 console.log('Failed to get oppaiData from cmd.');
-                failedReplays.push(path);
+                failedReplays.push(map.path);
             }
         }
 

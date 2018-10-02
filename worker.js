@@ -29,7 +29,7 @@ const modText = {
     "SpunOut":"SO"
 };
 
-let processedReplays;
+let processedReplays, lastReplay;
 let failedReplays = [];
 
 process.on('message', (msg) => {
@@ -38,7 +38,7 @@ process.on('message', (msg) => {
 
         for(let i = msg.startIndex; i < msg.mapList.length; i++) {
             processReplayData(msg.mapList[i], msg.deep);
-            process.send({index: i+1, total: msg.mapList.length, replays: processedReplays});
+            process.send({index: i+1, total: msg.mapList.length, replay: lastReplay});
         }
 
         process.send({done: true, failedReplays: failedReplays});
@@ -124,6 +124,8 @@ function processReplayData(map, deep) {
             pp: oppaiData[0],
             max_pp: oppaiData[2]
         };
+
+        lastReplay = {hash: data.ReplayHash, replayData: processedReplays[data.ReplayHash]};
     });
 }
 

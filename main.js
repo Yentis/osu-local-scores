@@ -153,7 +153,7 @@ function startWorker(data, deep, startIndex = 0){
     worker.on('message', (message) => {
         if(!message.done) {
             processReplayWindow.webContents.send('progress', {index: message.index, total: message.total});
-            processedReplays = message.replays;
+            processedReplays[message.replay.hash] = message.replay.replayData;
             processProgress = message.index;
         } else {
             processProgress = 0;

@@ -49,6 +49,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
     uint16_t n100 = args[3]->NumberValue();
     uint16_t n50 = args[4]->NumberValue();
     uint16_t nmiss = args[5]->NumberValue();
+    uint32_t mode = args[6]->NumberValue();
 
     struct diff_calc stars;
     struct pp_calc pp;
@@ -91,6 +92,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
         pp_params.speed = stars.speed;
 
         //optional
+        pp_params.mode = mode;
         pp_params.mods = mods;
         pp_params.combo = combo;
         pp_params.n100 = n100;

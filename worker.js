@@ -87,8 +87,8 @@ function oppaiCmd(cmd){
     return [pp, max_combo];
 }
 
-function cmdBuilder(path, mods, count100, count50, countmiss, combo){
-    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
+function cmdBuilder(path, mods, count100, count50, countmiss, combo, gamemode){
+    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x' + ' -m' + gamemode;
 }
 
 function processReplayData(map, deep) {
@@ -203,14 +203,20 @@ function getOppaiData(path, mods, combo, count100, count50, countmiss, gamemode)
     let max_combo = 0;
     let max_pp = 0;
 
-    if(gamemode === 'Standard') {
+    if(gamemode === 'Standard' || gamemode === 'Taiko') {
+        if(gamemode === 'Standard') {
+            gamemode = 0;
+        } else {
+            gamemode = 1;
+        }
+
         let modBits = modsToBit(mods);
-        let oppaiData = GetPP(path, modBits, combo, count100, count50, countmiss);
+        let oppaiData = GetPP(path, modBits, combo, count100, count50, countmiss, gamemode);
 
         if(!Array.isArray(oppaiData)) {
             console.log('Failed to get oppaiData from library.');
             let textMods = modsToText(mods);
-            oppaiData = oppaiCmd(cmdBuilder(path, textMods, combo, count100, count50, countmiss));
+            oppaiData = oppaiCmd(cmdBuilder(path, textMods, combo, count100, count50, countmiss, gamemode));
 
             if(!oppaiData || oppaiData[0] <= -1) {
                 console.log('Failed to get oppaiData from cmd.');

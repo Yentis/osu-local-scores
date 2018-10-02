@@ -120,8 +120,8 @@ $(document).ready(function () {
     }
 
     function applyFilters(replay, regexName, regex_id){
-        return !!((gradeToIndex(filters.gradeMin.toUpperCase()) != null && replay.grade >= gradeToIndex(filters.gradeMin.toUpperCase()))
-            && (filters.gradeMax === '' || (gradeToIndex(filters.gradeMax.toUpperCase()) && replay.grade <= gradeToIndex(filters.gradeMax.toUpperCase())))
+        return !!((filters.gradeMin === '' || (gradeToIndex(filters.gradeMin.toUpperCase()) != null && replay.grade >= gradeToIndex(filters.gradeMin.toUpperCase())))
+            && (filters.gradeMax === '' || (gradeToIndex(filters.gradeMax.toUpperCase()) != null && replay.grade <= gradeToIndex(filters.gradeMax.toUpperCase())))
             && (regex_id == null || replay.beatmap_id.match(regex_id))
             && (regexName == null || replay.name.toLowerCase().match(regexName))
             && replay.score >= filters.scoreMin
@@ -193,7 +193,7 @@ $(document).ready(function () {
         }
 
         let html = '';
-        html += '<td><a href="https://osu.ppy.sh/beatmapsets/' + replay.beatmapset_id + '#' + mode + '/' + replay.beatmap_id + '"><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" height="60"></a></td>';
+        html += '<td><a href="https://osu.ppy.sh/beatmapsets/' + replay.beatmapset_id + '#' + mode + '/' + replay.beatmap_id + '"><img src="http://b.ppy.sh/thumb/' + replay.beatmapset_id + '.jpg" onerror="this.src=\'assets/images/image-not-found.png\'" height="60"></a></td>';
         html += '<td><a href="osu://b/' + replay.beatmap_id + '">' + replay.name + '</a></td>';
         html += '<td>' + replay.mode + '</td>';
         html += '<td>' + replay.beatmap_id + '</td>';

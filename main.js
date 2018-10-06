@@ -25,7 +25,7 @@ if(process.env.NODE_ENV === 'production') {
 try {
     getScores = edge.func({
         source: csharpPath + '/ScoresDb.cs',
-        references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll', csharpPath + '/OppaiSharp.dll']
+        references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll']
     });
 } catch(ex) {
     globalError = ex;

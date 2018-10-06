@@ -87,7 +87,7 @@ function oppaiCmd(cmd){
     return [pp, max_combo];
 }
 
-function cmdBuilder(path, mods, count100, count50, countmiss, combo, gamemode){
+function cmdBuilder(path, mods, count100, count50, countmiss, combo){
     return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
 }
 
@@ -107,7 +107,7 @@ function processReplayData(map, deep) {
         }
 
         processedReplays[data.ReplayHash] = {
-            identifier: map.path.split('Songs\\')[1].replace(/ /g, ''),
+            identifier: map.path.split('Songs/')[1].replace(/ /g, ''),
             replayHash: data.ReplayHash,
             beatmap_id: map.beatmap_id.toString(),
             beatmapset_id: map.beatmapset_id,
@@ -226,6 +226,11 @@ function getOppaiData(map, data, index){
         pp = oppaiData[0];
         max_combo = oppaiData[1];
         max_pp = oppaiData[2];
+    } else if(data.GameMode === 'Mania') {
+        let oppaiData = map.maniaPPData[index];
+
+        pp = oppaiData[0];
+        max_pp = oppaiData[1];
     }
 
     return [pp, max_combo, max_pp];

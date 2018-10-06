@@ -29,7 +29,7 @@ public class Startup
 
         foreach (var curBeatmap in db2.Beatmaps)
         {
-            if (beatmaps.ContainsKey(curBeatmap.Key))
+            if(beatmaps.ContainsKey(curBeatmap.Key))
             {
                 var beatmapdata = beatmaps[curBeatmap.Key];
                 var artist = "";
@@ -50,7 +50,7 @@ public class Startup
                 }
 
                 var name = artist + " - " + title + " [" + version + "]";
-                var path = PathOsu + "/Songs/" + beatmapdata.FolderName + "/" + beatmapdata.BeatmapFileName;
+                var path = PathOsu + "\\Songs\\" + beatmapdata.FolderName + "\\" + beatmapdata.BeatmapFileName;
                 var replays = curBeatmap.Value;
 
                 List<double> starRatingsTaiko = new List<double>();

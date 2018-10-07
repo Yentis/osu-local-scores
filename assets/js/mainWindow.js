@@ -76,7 +76,7 @@ $(document).ready(function () {
         comboFilterType: 'percent'
     };
     let lastFilter = 'name';
-    let replayList, mapList, waitingTypeMods;
+    let replayList, mapList, waitingTypeMods, regexName, regex_id;
 
     const numberWithCommas = function(x){
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -119,7 +119,7 @@ $(document).ready(function () {
         }
     }
 
-    function applyFilters(replay, regexName, regex_id){
+    function applyFilters(replay){
         return !!((filters.gradeMin === '' || (gradeToIndex(filters.gradeMin.toUpperCase()) != null && replay.grade >= gradeToIndex(filters.gradeMin.toUpperCase())))
             && (filters.gradeMax === '' || (gradeToIndex(filters.gradeMax.toUpperCase()) != null && replay.grade <= gradeToIndex(filters.gradeMax.toUpperCase())))
             && (regex_id == null || replay.beatmap_id.match(regex_id))
@@ -130,7 +130,7 @@ $(document).ready(function () {
             && (filters.accuracyMax === '' || replay.accuracy <= filters.accuracyMax)
             && replay.misses >= filters.missesMin
             && (filters.missesMax === '' || replay.misses <= filters.missesMax)
-            && (filters.modeName === '' || replay.mode.toLowerCase() === filters.modeName.toLowerCase())
+            && (filters.modeName === '' || replay.mode.toLowerCase() === filters.modeName)
             && (filters.dateMin === '' || (getDate(replay.timestamp) - new Date(filters.dateMin)) >= 0)
             && (filters.dateMax === '' || (getDate(replay.timestamp) - new Date(filters.dateMax)) <= 0)
             && (filters.excludedMods.length === 0 || hasNoMod(filters.excludedMods, replay.mods))
@@ -265,17 +265,10 @@ $(document).ready(function () {
         for(let key in mapList) {
             if(mapList.hasOwnProperty(key)) {
                 let map = mapList[key];
-                let regexName, regex_id;
 
-                if(filters.mapName !== '') {
-                    regexName = new RegExp('.*' + filters.mapName.toLowerCase() + '.*');
-                }
+                updateRegex();
 
-                if(filters.beatmap_idNum !== '') {
-                    regex_id = new RegExp('.*' + filters.beatmap_idNum + '.*');
-                }
-
-                let highestValidIndex = getValidScore(key, regexName, regex_id);
+                let highestValidIndex = getValidScore(key);
 
                 if(highestValidIndex !== null) {
                     let toShowMap = map[highestValidIndex];
@@ -291,7 +284,15 @@ $(document).ready(function () {
 
         //display the scores
         displayList.forEach((score) => {
-            if(mapList[score.identifier].length > 1) {
+            let validSubReplays = 0;
+
+            mapList[score.identifier].forEach(function (replay) {
+                if(applyFilters(replay) && validSubReplays < 2) {
+                    validSubReplays++;
+                }
+            });
+
+            if(validSubReplays > 1) {
                 html += '<tr hidden class="scoreDisplay ' + score.identifier + ' ' + score.index + '">';
             } else {
                 html += '<tr hidden class="' + score.identifier + '">';
@@ -306,14 +307,28 @@ $(document).ready(function () {
         unhideElements();
     }
 
-    function getValidScore(identifier, regexName, regex_id) {
+    function updateRegex() {
+        if(filters.mapName !== '') {
+            regexName = new RegExp('.*' + filters.mapName.toLowerCase() + '.*');
+        } else {
+            regexName = null;
+        }
+
+        if(filters.beatmap_idNum !== '') {
+            regex_id = new RegExp('.*' + filters.beatmap_idNum + '.*');
+        } else {
+            regex_id = null;
+        }
+    }
+
+    function getValidScore(identifier) {
         let highestValidIndex = null;
 
         mapList[identifier].forEach(function (score, index) {
             if(highestValidIndex !== null && highestValidIndex < index) {
                 return;
             }
-            let filtersFit = applyFilters(score, regexName, regex_id);
+            let filtersFit = applyFilters(score);
 
             if(filtersFit) {
                 highestValidIndex = index;
@@ -389,7 +404,7 @@ $(document).ready(function () {
             let html = '';
 
             for(let i = 0; i < mapList[identifier].length; i++) {
-                if(i !== shownIndex) {
+                if(i !== shownIndex && applyFilters(mapList[identifier][i])) {
                     html += '<tr class="otherScores">';
                     html += addHtml(mapList[identifier][i]);
                 }

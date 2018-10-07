@@ -10,74 +10,80 @@
 <p id="message"></p>
 <table id="replayTable" class="centered">
     <thead>
-        <tr>
-            <th id="showamount"></th>
-            <th><a href="#" id="name">▲ Name</a></th>
-            <th><a href="#" id="mode">Gamemode</a></th>
-            <th><a href="#" id="beatmap_id">Beatmap ID</a></th>
-            <th><a href="#" id="score">Score</a></th>
-            <th><a href="#" id="grade">Grade</a></th>
-            <th><a href="#" id="accuracy">Accuracy</a></th>
-            <th><a href="#" id="misses">Misses</a></th>
-            <th><a href="#" id="combo">Combo / Max</a></th>
-            <th>Mods</th>
-            <th><a href="#" id="timestamp">Date</a></th>
-            <th><a href="#" id="pp">PP</a> / <a href="#" id="max_pp">Max</a></th>
-        </tr>
-        <tr>
-            <td></td>
-            <td>
-                <input type="text" id="mapName" placeholder="Search">
-            </td>
-            <td>
-                <input type="text" id="modeName" placeholder="Mode">
-            </td>
-            <td>
-                <input type="number" id="beatmap_idNum" placeholder="ID">
-            </td>
-            <td>
-                <input type="number" id="scoreMin" placeholder="Min">
-                <input type="number" id="scoreMax" placeholder="Max">
-            </td>
-            <td>
-                <input type="text" id="gradeMin" placeholder="Min">
-                <input type="text" id="gradeMax" placeholder="Max">
-            </td>
-            <td>
-                <input type="number" id="accuracyMin" placeholder="Min %">
-                <input type="number" id="accuracyMax" placeholder="Max %">
-            </td>
-            <td>
-                <input type="number" id="missesMin" placeholder="Min">
-                <input type="number" id="missesMax" placeholder="Max">
-            </td>
-            <td>
-                <select id="comboFilterType">
-                    <option value="percent">Percentage</option>
-                    <option value="number">Number</option>
-                </select>
-                <input type="number" id="comboMin" placeholder="Min">
-                <input type="number" id="comboMax" placeholder="Max">
-            </td>
-            <td>
-                <button class="waves-effect waves-light btn" id="includeMods" style="margin-bottom: 5px;">Include</button>
-                <button class="waves-effect waves-light btn" id="excludeMods">Exclude</button>
-            </td>
-            <td>
-                <input type="text" id="dateMin" class="datepicker" placeholder="Min">
-                <input type="text" id="dateMax" class="datepicker" placeholder="Max">
-            </td>
-            <td>
-                <div class="row">
-                    <div class="input-field col s6">
-                        <input type="number" id="ppMin" placeholder="Min"><input type="number" id="ppMax" placeholder="Max">
-                    </div>
-                    <div class="input-field col s6">
-                        <input type="number" id="max_ppMin" placeholder="Min"><input type="number" id="max_ppMax" placeholder="Max">
-                    </div>
+    <tr>
+        <th id="showamount"></th>
+        <th><a href="#" id="name">▲ Name</a></th>
+        <th><a href="#" id="mode">Gamemode</a></th>
+        <th><a href="#" id="beatmap_id">Beatmap ID</a></th>
+        <th><a href="#" id="score">Score</a></th>
+        <th><a href="#" id="grade">Grade</a></th>
+        <th><a href="#" id="accuracy">Accuracy</a></th>
+        <th><a href="#" id="misses">Misses</a></th>
+        <th><a href="#" id="combo">Combo / Max</a></th>
+        <th>Mods</th>
+        <th><a href="#" id="timestamp">Date</a></th>
+        <th><a href="#" id="pp">PP</a> / <a href="#" id="max_pp">Max</a></th>
+    </tr>
+    <tr>
+        <td></td>
+        <td>
+            <input type="text" id="mapName" placeholder="Search">
+        </td>
+        <td>
+            <select id="modeName">
+                <option value="">All</option>
+                <option value="standard">Standard</option>
+                <option value="taiko">Taiko</option>
+                <option value="catchthebeat">Catch the Beat</option>
+                <option value="mania">Mania</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" id="beatmap_idNum" placeholder="ID">
+        </td>
+        <td>
+            <input type="number" id="scoreMin" placeholder="Min">
+            <input type="number" id="scoreMax" placeholder="Max">
+        </td>
+        <td>
+            <input type="text" id="gradeMin" placeholder="Min">
+            <input type="text" id="gradeMax" placeholder="Max">
+        </td>
+        <td>
+            <input type="number" id="accuracyMin" placeholder="Min %">
+            <input type="number" id="accuracyMax" placeholder="Max %">
+        </td>
+        <td>
+            <input type="number" id="missesMin" placeholder="Min">
+            <input type="number" id="missesMax" placeholder="Max">
+        </td>
+        <td>
+            <select id="comboFilterType">
+                <option value="percent">Percentage</option>
+                <option value="number">Number</option>
+            </select>
+            <input type="number" id="comboMin" placeholder="Min">
+            <input type="number" id="comboMax" placeholder="Max">
+        </td>
+        <td>
+            <button class="waves-effect waves-light btn" id="includeMods" style="margin-bottom: 5px;">Include</button>
+            <button class="waves-effect waves-light btn" id="excludeMods">Exclude</button>
+        </td>
+        <td>
+            <input type="text" id="dateMin" class="datepicker" placeholder="Min">
+            <input type="text" id="dateMax" class="datepicker" placeholder="Max">
+        </td>
+        <td>
+            <div class="row">
+                <div class="input-field col s6">
+                    <input type="number" id="ppMin" placeholder="Min"><input type="number" id="ppMax" placeholder="Max">
                 </div>
-            </td>
-        </tr>
+                <div class="input-field col s6">
+                    <input type="number" id="max_ppMin" placeholder="Min"><input type="number" id="max_ppMax" placeholder="Max">
+                </div>
+            </div>
+        </td>
+    </tr>
     </thead>
 </table>
 <script>

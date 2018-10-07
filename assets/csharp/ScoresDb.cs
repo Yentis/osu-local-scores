@@ -64,10 +64,10 @@ public class Startup
                     switch (replay.GameMode)
                     {
                         case GameMode.Taiko:
-                            beatmapdata.DiffStarRatingTaiko.TryGetValue(replay.Mods, out starRating);
+                            getStarRating(replay.Mods, beatmapdata.DiffStarRatingTaiko, out starRating);
                             break;
                         case GameMode.Mania:
-                            beatmapdata.DiffStarRatingMania.TryGetValue(replay.Mods, out starRating);
+                            getStarRating(replay.Mods, beatmapdata.DiffStarRatingMania, out starRating);
                             var objectCount = beatmapdata.CountSliders + beatmapdata.CountHitCircles;
                             var maniaPP = new ManiaPerformanceCalculator(replay.Mods, objectCount, beatmapdata.OveralDifficulty, replay.Score, starRating);
                             ppdata = maniaPP.ppValues;
@@ -83,6 +83,43 @@ public class Startup
         }
 
         return scoresList;
+    }
+
+    private void getStarRating(Mods mods, Dictionary<Mods, double> dict, out double starRating)
+    {
+        Mods modLookup = Mods.None;
+
+        if((mods & Mods.DoubleTime) > 0)
+        {
+            modLookup = addSubMods(mods) | Mods.DoubleTime;
+        } else if((mods & Mods.HalfTime) > 0)
+        {
+            modLookup = addSubMods(mods) | Mods.HalfTime;
+        } else if((mods & Mods.Easy) > 0)
+        {
+            modLookup = modLookup | Mods.Easy;
+        } else if((mods & Mods.HardRock) > 0)
+        {
+            modLookup = modLookup | Mods.HardRock;
+        }
+
+        dict.TryGetValue(modLookup, out starRating);
+    }
+
+    private Mods addSubMods(Mods mods)
+    {
+        Mods modLookup = mods;
+
+        if ((mods & Mods.Easy) > 0)
+        {
+            modLookup = modLookup | Mods.Easy;
+        }
+        else if ((mods & Mods.HardRock) > 0)
+        {
+            modLookup = modLookup | Mods.HardRock;
+        }
+
+        return modLookup;
     }
 }
 
@@ -156,8 +193,8 @@ public class ManiaPerformanceCalculator
         double accValue = ComputeAccValue(strainValue, score);
         ppValues.Add(ComputeTotalPP(strainValue, accValue, multiplier));
 
-        strainValue = ComputeStrainValue(MAX_SCORE);
-        accValue = ComputeAccValue(strainValue, MAX_SCORE);
+        strainValue = ComputeStrainValue(MAX_SCORE * scoreMultiplier);
+        accValue = ComputeAccValue(strainValue, MAX_SCORE * scoreMultiplier);
         ppValues.Add(ComputeTotalPP(strainValue, accValue, multiplier));
     }
 
@@ -194,29 +231,29 @@ public class ManiaPerformanceCalculator
         double strainValue = Math.Pow(5 * Math.Max(1, stars / 0.2) - 4, 2.2) / 135;
         strainValue *= 1 + 0.1 * Math.Min(1, noteCount / 1500);
 
-        if (score <= 500000)
+        if (realScore <= 500000)
         {
             strainValue = 0;
         }
-        else if (score <= 600000)
+        else if (realScore <= 600000)
         {
-            strainValue *= 0.3 * ((score - 500000.0) / 100000);
+            strainValue *= 0.3 * ((realScore - 500000.0) / 100000);
         }
-        else if (score <= 700000)
+        else if (realScore <= 700000)
         {
-            strainValue *= 0.3 + 0.25 * ((score - 600000.0) / 100000);
+            strainValue *= 0.3 + 0.25 * ((realScore - 600000.0) / 100000);
         }
-        else if (score <= 800000)
+        else if (realScore <= 800000)
         {
-            strainValue *= 0.55 + 0.2 * ((score - 700000.0) / 100000);
+            strainValue *= 0.55 + 0.2 * ((realScore - 700000.0) / 100000);
         }
-        else if (score <= 900000)
+        else if (realScore <= 900000)
         {
-            strainValue *= 0.75 + 0.15 * ((score - 800000.0) / 100000);
+            strainValue *= 0.75 + 0.15 * ((realScore - 800000.0) / 100000);
         }
         else
         {
-            strainValue *= 0.9 + 0.1 * ((score - 900000.0) / 100000);
+            strainValue *= 0.9 + 0.1 * ((realScore - 900000.0) / 100000);
         }
 
         return strainValue;

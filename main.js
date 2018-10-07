@@ -25,7 +25,7 @@ if(process.env.NODE_ENV === 'production') {
 try {
     getScores = edge.func({
         source: csharpPath + '/ScoresDb.cs',
-        references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll']
+        references: [csharpPath + '/osu-database-reader.dll', csharpPath + '/osu.Shared.dll', csharpPath + '/OppaiSharp.dll']
     });
 } catch(ex) {
     globalError = ex;
@@ -145,27 +145,17 @@ function createProcessReplayWindow(deep){
     });
 }
 
-let processProgress = 0;
 function startWorker(data, deep, startIndex = 0){
     let worker = fork(path.resolve(__dirname, 'worker.js'));
     worker.send({mapList: data, startIndex: startIndex, deep: deep, replays: processedReplays});
 
     worker.on('message', (message) => {
-        if(!message.done) {
+        if(!message.processedReplays) {
             processReplayWindow.webContents.send('progress', {index: message.index, total: message.total});
-            processedReplays[message.replay.hash] = message.replay.replayData;
-            processProgress = message.index;
         } else {
-            processProgress = 0;
+            processedReplays = message.processedReplays;
             dataEmitter.emit('done', message.failedReplays);
             worker.send('exit');
-        }
-    });
-
-    worker.on('exit', (code) => {
-        //it crashed, create another one
-        if(code !== 0) {
-            startWorker(data, deep, processProgress+1);
         }
     });
 }

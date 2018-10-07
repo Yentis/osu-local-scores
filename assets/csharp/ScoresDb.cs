@@ -50,7 +50,7 @@ public class Startup
                 }
 
                 var name = artist + " - " + title + " [" + version + "]";
-                var path = PathOsu + "\\Songs\\" + beatmapdata.FolderName + "\\" + beatmapdata.BeatmapFileName;
+                var path = PathOsu + "/Songs/" + beatmapdata.FolderName + "/" + beatmapdata.BeatmapFileName;
                 var replays = curBeatmap.Value;
 
                 List<double> starRatingsTaiko = new List<double>();
@@ -78,7 +78,7 @@ public class Startup
                     maniaPPData.Add(ppdata);
                 }
 
-                scoresList.Add(new Score(name, path, starRatingsTaiko, maniaPPData, beatmapdata.OveralDifficulty, beatmapdata.BeatmapId, beatmapdata.BeatmapSetId, replays));
+                scoresList.Add(new Score(name, path, starRatingsTaiko, maniaPPData, beatmapdata.CountHitCircles, beatmapdata.OveralDifficulty, beatmapdata.BeatmapId, beatmapdata.BeatmapSetId, replays));
             }
         }
 
@@ -92,17 +92,19 @@ public class Score
     public string path;
     public List<double> starRatingsTaiko;
     public List<List<double>> maniaPPData;
+    public ushort hitCircles;
     public float overallDifficulty;
     public int beatmap_id;
     public int beatmapset_id;
     public List<Replay> replays;
 
-    public Score(string name, string path, List<double> starRatingsTaiko, List<List<double>> maniaPPData, float overallDifficulty, int beatmap_id, int beatmapset_id, List<Replay> replays)
+    public Score(string name, string path, List<double> starRatingsTaiko, List<List<double>> maniaPPData, ushort hitCircles, float overallDifficulty, int beatmap_id, int beatmapset_id, List<Replay> replays)
     {
         this.name = name;
         this.path = path;
         this.starRatingsTaiko = starRatingsTaiko;
         this.maniaPPData = maniaPPData;
+        this.hitCircles = hitCircles;
         this.overallDifficulty = overallDifficulty;
         this.beatmap_id = beatmap_id;
         this.beatmapset_id = beatmapset_id;

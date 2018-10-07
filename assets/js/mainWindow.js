@@ -251,7 +251,7 @@ $(document).ready(function () {
                 let curReplay = replayList[key];
                 let curMapList = mapList[curReplay.identifier];
 
-                if(curMapList) {
+                if(curMapList != null) {
                     curMapList.push(curReplay);
                     mapList[curReplay.identifier] = sortMapReplays(curMapList);
                 } else {

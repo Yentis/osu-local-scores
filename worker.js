@@ -29,7 +29,7 @@ const modText = {
     "SpunOut":"SO"
 };
 
-let processedReplays, lastReplay;
+let processedReplays;
 let failedReplays = [];
 
 process.on('message', (msg) => {
@@ -38,10 +38,10 @@ process.on('message', (msg) => {
 
         for(let i = msg.startIndex; i < msg.mapList.length; i++) {
             processReplayData(msg.mapList[i], msg.deep);
-            process.send({index: i+1, total: msg.mapList.length, replay: lastReplay});
+            process.send({index: i+1, total: msg.mapList.length});
         }
 
-        process.send({done: true, failedReplays: failedReplays});
+        process.send({processedReplays: processedReplays, failedReplays: failedReplays});
     } else if(msg === 'exit') {
         process.exit();
     }
@@ -87,12 +87,13 @@ function oppaiCmd(cmd){
     return [pp, max_combo];
 }
 
-function cmdBuilder(path, mods, count100, count50, countmiss, combo){
+function cmdBuilder(path, mods, count100, count50, countmiss, combo, gamemode){
     return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
 }
 
 function processReplayData(map, deep) {
     map.replays.forEach(function (data, index) {
+
         if(!deep && processedReplays[data.ReplayHash]) {
             return;
         }
@@ -107,7 +108,7 @@ function processReplayData(map, deep) {
         }
 
         processedReplays[data.ReplayHash] = {
-            identifier: map.path.split('Songs\\')[1].replace(/ /g, ''),
+            identifier: map.path.split('Songs/')[1].replace(/ /g, ''),
             replayHash: data.ReplayHash,
             beatmap_id: map.beatmap_id.toString(),
             beatmapset_id: map.beatmapset_id,
@@ -124,8 +125,6 @@ function processReplayData(map, deep) {
             pp: oppaiData[0],
             max_pp: oppaiData[2]
         };
-
-        lastReplay = {hash: data.ReplayHash, replayData: processedReplays[data.ReplayHash]};
     });
 }
 

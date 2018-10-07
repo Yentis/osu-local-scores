@@ -87,7 +87,7 @@ function oppaiCmd(cmd){
     return [pp, max_combo];
 }
 
-function cmdBuilder(path, mods, count100, count50, countmiss, combo, gamemode){
+function cmdBuilder(path, mods, count100, count50, countmiss, combo){
     return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
 }
 

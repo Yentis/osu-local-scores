@@ -1,6 +1,7 @@
 const path = require('path');
 const {GetPP} = require(path.resolve(__dirname, 'assets', 'addon', 'build', 'Release', 'ppCalculator'));
 const {execSync} = require('child_process');
+const pyPath = path.resolve(__dirname, 'assets', 'py');
 
 const modTable = {
     "None": 0,
@@ -87,8 +88,23 @@ function oppaiCmd(cmd){
     return [pp, max_combo];
 }
 
-function cmdBuilder(path, mods, count100, count50, countmiss, combo){
-    return 'oppai "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
+function pythonCmd(cmd){
+    let stdout = execSync(cmd).toString();
+
+    let results = stdout.split(' ');
+    let pp = parseFloat(results[1]);
+    let max_combo = parseInt(results[2]);
+    let max_pp = parseFloat(results[3]);
+
+    return [pp, max_combo, max_pp];
+}
+
+function cmdBuilder(calculator, path, mods, count100, count50, countmiss, combo){
+    if(calculator === 'oppai') {
+        return calculator + ' "' + path + '" +' + mods + ' ' + count100 + 'x100 ' + count50 + 'x50 ' + countmiss + 'xmiss ' + combo + 'x';
+    } else {
+        return calculator + ' "' + path + '" ' + mods + ' ' + count100 / 100 + ' ' + combo + ' ' + countmiss;
+    }
 }
 
 function processReplayData(map, deep) {
@@ -99,7 +115,7 @@ function processReplayData(map, deep) {
         }
 
         let accuracy = getAccuracy(data);
-        let oppaiData = getOppaiData(map, data, index);
+        let oppaiData = getOppaiData(map, data, index, accuracy);
         let combo = data.Combo;
 
         //if combo is somehow larger than max combo let's just assume that our combo is an FC (problem with oppai-ng)
@@ -199,37 +215,50 @@ function getGrade(replay, accuracy){
     }
 }
 
-function getOppaiData(map, data, index){
+function getOppaiData(map, data, index, accuracy){
     let pp = 0;
     let max_combo = 0;
     let max_pp = 0;
+    let oppaiData = null;
 
-    if(data.GameMode === 'Standard' || data.GameMode === 'Taiko') {
-        let modBits = modsToBit(data.Mods);
-        let oppaiData = GetPP(map.path, modBits, data.Combo, data.Count100, data.Count50, data.CountMiss,
-            data.GameMode === 'Standard' ? 0 : 1,
-            data.GameMode === 'Taiko' ? map.starRatingsTaiko[index] : 0,
-            map.hitCircles, map.overallDifficulty);
+    switch(data.GameMode) {
+        case 'Standard':
+        case 'Taiko':
+            let modBits = modsToBit(data.Mods);
+            oppaiData = GetPP(map.path, modBits, data.Combo, data.Count100, data.Count50, data.CountMiss,
+                data.GameMode === 'Standard' ? 0 : 1,
+                data.GameMode === 'Taiko' ? map.starRatingsTaiko[index] : 0,
+                map.hitCircles, map.overallDifficulty);
 
-        if(!Array.isArray(oppaiData)) {
-            console.log('Failed to get oppaiData from library.');
-            let textMods = modsToText(data.Mods);
-            oppaiData = oppaiCmd(cmdBuilder(map.path, textMods, data.Combo, data.Count100, data.Count50, data.CountMiss));
+            if(!Array.isArray(oppaiData)) {
+                console.log('Failed to get oppaiData from library.');
+                let textMods = modsToText(data.Mods);
+                oppaiData = oppaiCmd(cmdBuilder('oppai', map.path, textMods, data.Combo, data.Count100, data.Count50, data.CountMiss));
 
-            if(!oppaiData || oppaiData[0] <= -1) {
-                console.log('Failed to get oppaiData from cmd.');
-                failedReplays.push(map.path);
+                if(!oppaiData || oppaiData[0] <= -1) {
+                    console.log('Failed to get oppaiData from cmd.');
+                    failedReplays.push(map.path);
+                }
             }
-        }
 
-        pp = oppaiData[0];
-        max_combo = oppaiData[1];
-        max_pp = oppaiData[2];
-    } else if(data.GameMode === 'Mania') {
-        let oppaiData = map.maniaPPData[index];
+            pp = oppaiData[0];
+            max_combo = oppaiData[1];
+            max_pp = oppaiData[2];
+            break;
+        case 'Mania':
+            oppaiData = map.maniaPPData[index];
 
-        pp = oppaiData[0];
-        max_pp = oppaiData[1];
+            pp = oppaiData[0];
+            max_pp = oppaiData[1];
+            break;
+        case 'CatchTheBeat':
+            let textMods = modsToText(data.Mods);
+            oppaiData = pythonCmd(cmdBuilder('python ' + pyPath + '\\sample.py', map.path, textMods, accuracy, 0, data.CountMiss, data.Combo));
+
+            pp = oppaiData[0];
+            max_combo = oppaiData[1];
+            max_pp = oppaiData[2];
+            break;
     }
 
     return [pp, max_combo, max_pp];

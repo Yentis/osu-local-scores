@@ -28,6 +28,6 @@
   "gypfile": true,
   "build": {
     "appId": "osu.local.scores",
-	"asarUnpack": "assets/csharp/"
+    "asarUnpack": "assets/csharp/"
   }
 }

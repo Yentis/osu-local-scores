@@ -8,6 +8,9 @@ Process local replays and present them in a filterable way
 - PP values & max combo
 - Auto refreshes when you set a score in osu! (may take 2-3 min)
 
+# Preview
+![Preview](https://i.imgur.com/tg5kU2z.png)
+
 ## Building
 ```bash
 yarn install

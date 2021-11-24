@@ -48,16 +48,16 @@ export class UpdateService {
     return githubReleases
   }
 
-  private getMigrationVersion () {
+  private getVersion () {
     return LocalStorage.getItem(VERSION) || ''
   }
 
   private async getChangelog (): Promise<string | undefined> {
-    const migrationVersion = this.getMigrationVersion()
-    if (migrationVersion === packageInfo.version) return
+    const version = this.getVersion()
+    if (version === packageInfo.version) return
     const releases = await this.getReleases()
 
-    let latestSeenReleaseIndex = releases.findIndex(release => release.tag_name === migrationVersion)
+    let latestSeenReleaseIndex = releases.findIndex(release => release.tag_name === version)
     if (latestSeenReleaseIndex === -1) latestSeenReleaseIndex = releases.findIndex(release => release.tag_name.endsWith('0'))
     else latestSeenReleaseIndex = Math.max(latestSeenReleaseIndex - 1, 0)
     if (latestSeenReleaseIndex === -1) return 'No release found, please notify Yentis#5218 on Discord.'
@@ -106,7 +106,7 @@ export class UpdateService {
 
   private getAsset (githubRelease: GithubRelease): Asset | undefined {
     const zipAsset = githubRelease.assets.find(asset => {
-      return asset.name === 'osu! Score Overview-win32-x64.zip'
+      return asset.name === 'osu.Score.Overview-win32-x64.zip'
     })
     return zipAsset
   }

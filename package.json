@@ -1,33 +1,51 @@
 {
   "name": "osu-local-scores",
-  "version": "1.9.0",
-  "description": "read local scores",
-  "main": "main.js",
-  "author": "Yentis",
-  "dependencies": {
-    "echo-js": "^1.7.3",
-    "electron-edge-js": "^8.3.8",
-    "electron-store": "^2.0.0",
-    "hammerjs": "^2.0.8",
-    "jquery": "^3.5.0",
-    "materialize-css": "^1.0.0-rc.2",
-    "nan": "^2.6.1",
-    "node-gyp": "^3.6.0"
-  },
+  "version": "0.0.1",
+  "description": "Process local replays and present them in a filterable way",
+  "productName": "osu! Score Overview",
+  "author": "Yentis#5218",
+  "private": true,
   "scripts": {
-    "compile": "node-gyp rebuild",
-    "compile-debug": "node-gyp rebuild --debug",
-    "start": "electron .",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "lint": "eslint --ext .js,.ts,.vue ./",
+    "test": "echo \"No test specified\" && exit 0",
+    "dev::electron": "quasar dev -m electron",
+    "build::wasm": "cd src-wasm && cargo clippy && wasm-pack build",
+    "build::electron": "quasar build -m electron"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.0.0",
+    "core-js": "^3.6.5",
+    "quasar": "^2.0.0"
   },
   "devDependencies": {
-    "electron": "^11.5.0",
-    "electron-builder": "^20.28.4"
+    "@babel/eslint-parser": "^7.13.14",
+    "@quasar/app": "^3.0.0",
+    "@types/node": "^12.20.21",
+    "@typescript-eslint/eslint-plugin": "^4.16.1",
+    "@typescript-eslint/parser": "^4.16.1",
+    "electron": "^16.0.1",
+    "electron-packager": "^15.2.0",
+    "eslint": "^7.14.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-vue": "^7.0.0"
   },
-  "gypfile": true,
-  "build": {
-    "appId": "osu.local.scores",
-    "asarUnpack": "assets/csharp/"
+  "browserslist": [
+    "last 10 Chrome versions",
+    "last 10 Firefox versions",
+    "last 4 Edge versions",
+    "last 7 Safari versions",
+    "last 8 Android versions",
+    "last 8 ChromeAndroid versions",
+    "last 8 FirefoxAndroid versions",
+    "last 10 iOS versions",
+    "last 5 Opera versions"
+  ],
+  "engines": {
+    "node": ">= 12.22.1",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
   }
 }

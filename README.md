@@ -1,10 +1,25 @@
-# osu-local-scores
-Process local replays and present them in a filterable way.
+# osu! Score Overview
 
-<h1>Usage</h1>
-<br>npm install<br>
-npm start
+Process local replays and present them in a filterable way
 
-<h1>Libraries used</h1>
-<a href="https://github.com/Francesco149/oppai-ng">oppai-ng</a><br>
-<a href="https://github.com/HoLLy-HaCKeR/osu-database-reader">osu-database-reader</a>
+## Features
+
+- Filtering, search & sort many different fields
+- PP values & max combo
+- Auto refreshes when you set a score in osu! (may take 2-3 min)
+
+## Building
+```bash
+yarn install
+yarn dev::electron
+yarn build::electron
+```
+
+After building you will need to do the following steps (suggestions welcome):
+- Move the .wasm file from "dist/electron/osu! Score Overview-win32-x64/resources/app" to "dist/electron/osu! Score Overview-win32-x64/resources/app/js"
+- Edit "dist/electron/osu! Score Overview-win32-x64/resources/app/js/496.js" and change "js/vendor.js" to "vendor.js"
+
+## Libraries
+
+https://github.com/negamartin/osu-db
+https://github.com/MaxOhn/rosu-pp

@@ -1,0 +1,22 @@
+[package]
+name = "osu-local-scores-wasm"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+serde = { version = "1.0.130", features = ["derive"] }
+wasm-bindgen = { version = "0.2.63", features = ["serde-serialize"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[dependencies.osu-db]
+git = "https://github.com/MaxOhn/osu-db"
+branch = "yentos"
+default-features = false
+
+[dependencies.rosu-pp]
+git = "https://github.com/MaxOhn/rosu-pp"
+branch = "next"
+default-features = true

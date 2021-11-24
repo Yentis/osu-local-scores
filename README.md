@@ -4,9 +4,15 @@ Process local replays and present them in a filterable way
 
 ## Features
 
-- Filtering, search & sort many different fields
+- Filter, search & sort many different fields
 - PP values & max combo
 - Auto refreshes when you set a score in osu! (may take 2-3 min)
+
+## Download
+https://github.com/Yentis/osu-local-scores/releases
+
+## Preview
+![Preview](https://i.imgur.com/tg5kU2z.png)
 
 ## Building
 ```bash

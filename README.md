@@ -21,5 +21,5 @@ After building you will need to do the following steps (suggestions welcome):
 
 ## Libraries
 
-https://github.com/negamartin/osu-db
+https://github.com/negamartin/osu-db  
 https://github.com/MaxOhn/rosu-pp

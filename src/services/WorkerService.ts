@@ -26,8 +26,8 @@ class WorkerService {
       switch (data.func) {
         case WorkerFunc.GET_FILE_BUFFERS: {
           const pathMap = args as Map<string, string>
-          this.platformService.getFileBuffers(pathMap).then((bufferMap) => {
-            this.worker.postMessage({ id, func, args: bufferMap }, Array.from(bufferMap.values()))
+          this.platformService.getFileBuffers(pathMap).then((bufferResult) => {
+            this.worker.postMessage({ id, func, args: bufferResult }, Array.from(bufferResult.buffers.values()))
           }).catch((error: unknown) => {
             this.worker.postMessage({ id, func, args: error })
           })
@@ -71,11 +71,16 @@ class WorkerService {
     const pathMap = new Map<string, string>()
     pathMap.set('osu', `${osuPath}/osu!.db`)
     pathMap.set('scores', `${osuPath}/scores.db`)
-    const bufferMap = await this.platformService.getFileBuffers(pathMap)
+    const { buffers, errors } = await this.platformService.getFileBuffers(pathMap)
+
+    if (errors.length > 0) {
+      console.error(errors)
+      throw errors[0]
+    }
 
     return {
-      osuBuffer: bufferMap.get('osu') as ArrayBuffer,
-      scoresBuffer: bufferMap.get('scores') as ArrayBuffer,
+      osuBuffer: buffers.get('osu') as ArrayBuffer,
+      scoresBuffer: buffers.get('scores') as ArrayBuffer,
       osuPath
     }
   }

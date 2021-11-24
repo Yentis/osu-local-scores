@@ -2,6 +2,7 @@ import { getBeatmaps, calculatePp, PpOutput } from 'app/src-wasm/pkg'
 import DatabaseResponse, { MANIA, MODES } from 'src/interfaces/DatabaseResponse'
 import { InitData, WorkerData, WorkerEvent, WorkerFunc } from 'src/interfaces/Worker'
 import Filter from 'src/interfaces/Filter'
+import { FileBufferResult } from 'src/interfaces/ElectronWindow'
 
 type WorkerListener = (workerData: WorkerData) => void
 const workerListeners = new Map<string, WorkerListener>()
@@ -256,7 +257,7 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
   return matchingRows
 }
 
-function getFileBuffers (pathMap: Map<string, string>): Promise<Map<string, ArrayBuffer>> {
+function getFileBuffers (pathMap: Map<string, string>): Promise<FileBufferResult> {
   return new Promise((resolve, reject) => {
     const id = Math.random().toString()
 
@@ -266,7 +267,7 @@ function getFileBuffers (pathMap: Map<string, string>): Promise<Map<string, Arra
         return
       }
 
-      const result = workerData.args as Map<string, ArrayBuffer>
+      const result = workerData.args as FileBufferResult
       resolve(result)
     })
 
@@ -311,25 +312,32 @@ async function calculatePpValues (osuPath: string, beatmaps: DatabaseResponse[])
     pathMap.set(beatmap.beatmap.hash, path)
   }
 
-  const bufferMap = await getFileBuffers(pathMap)
-  batchCalculatePp(bufferMap)
+  const { buffers, errors } = await getFileBuffers(pathMap)
+  if (errors) console.error(errors)
+
+  batchCalculatePp(buffers)
 }
 
 function batchCalculatePp (bufferMap: Map<string, ArrayBuffer>) {
   bufferMap.forEach((buffer, hash) => {
+    if (buffer.byteLength === 0) return
     const beatmap = beatmaps?.[hash]
     if (!beatmap) return
     const gamemode = beatmap.beatmap.gamemode
 
     // TODO CONVERTS
-    calculatePp(gamemode, beatmap.scores, new Uint8Array(buffer)).forEach((ppOutput: PpOutput, index) => {
-      const score = beatmap.scores[index]
-      if (!score) return
+    try {
+      calculatePp(gamemode, beatmap.scores, new Uint8Array(buffer)).forEach((ppOutput: PpOutput, index) => {
+        const score = beatmap.scores[index]
+        if (!score) return
 
-      score.pp = ppOutput.pp === null ? undefined : ppOutput.pp
-      score.maxPp = ppOutput.maxPp === null ? undefined : ppOutput.maxPp
-      score.maxCombo = ppOutput.maxCombo === null ? undefined : ppOutput.maxCombo
-    })
+        score.pp = ppOutput.pp === null ? undefined : ppOutput.pp
+        score.maxPp = ppOutput.maxPp === null ? undefined : ppOutput.maxPp
+        score.maxCombo = ppOutput.maxCombo === null ? undefined : ppOutput.maxCombo
+      })
+    } catch (error) {
+      console.error(error)
+    }
   })
 
   if (!beatmaps) return

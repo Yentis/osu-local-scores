@@ -1,6 +1,6 @@
 import { OpenDialogReturnValue } from 'electron'
 import { Notify } from 'quasar'
-import ElectronWindow from 'src/interfaces/ElectronWindow'
+import ElectronWindow, { FileBufferResult } from 'src/interfaces/ElectronWindow'
 
 class PlatformService {
   private electronWindow = (window as unknown) as ElectronWindow
@@ -18,7 +18,7 @@ class PlatformService {
     return this.electronWindow.osuLocalScores.watchFile(path, onChanged)
   }
 
-  getFileBuffers (pathMap: Map<string, string>): Promise<Map<string, ArrayBuffer>> {
+  getFileBuffers (pathMap: Map<string, string>): Promise<FileBufferResult> {
     return this.electronWindow.osuLocalScores.getFileBuffers(pathMap)
   }
 

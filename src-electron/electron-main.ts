@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, nativeTheme, OpenDialogReturnValue
 import path from 'path'
 import os from 'os'
 import fs, { FSWatcher } from 'fs'
+import { FileBufferResult } from 'src/interfaces/ElectronWindow'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -104,15 +105,21 @@ async function getBackgroundName (path: string): Promise<string | undefined> {
   return backgroundImage?.trim()
 }
 
-ipcMain.handle('get-file-buffers', async (_, pathMap: Map<string, string>): Promise<Map<string, ArrayBuffer>> => {
+ipcMain.handle('get-file-buffers', async (_, pathMap: Map<string, string>): Promise<FileBufferResult> => {
   await app.whenReady()
   const bufferMap = new Map<string, ArrayBuffer>()
   const promises: Promise<void>[] = []
+  const errors: Error[] = []
 
   pathMap.forEach((path, hash) => {
-    const promise = new Promise<ArrayBuffer>((resolve, reject) => {
+    const promise = new Promise<ArrayBuffer>((resolve) => {
       fs.readFile(path, (err, data) => {
-        if (err) return reject(err)
+        if (err) {
+          if (err instanceof Error) errors.push(err)
+          else errors.push(Error(err as string))
+
+          return resolve(new ArrayBuffer(0))
+        }
         resolve(data.buffer)
       })
     })
@@ -123,7 +130,7 @@ ipcMain.handle('get-file-buffers', async (_, pathMap: Map<string, string>): Prom
   })
 
   await Promise.all(promises)
-  return bufferMap
+  return { buffers: bufferMap, errors }
 })
 
 let fsWait = false

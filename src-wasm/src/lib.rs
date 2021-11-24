@@ -9,8 +9,8 @@ mod parsing;
 mod replay;
 
 #[wasm_bindgen(js_name="getBeatmaps")]
-pub fn get_beatmaps(osu_buffer: &[u8], scores_buffer: &[u8]) -> JsValue {
-    let listing = Listing::from_bytes(osu_buffer).unwrap_throw();
+pub fn get_beatmaps(osu_buffer: &[u8], scores_buffer: &[u8]) -> Result<JsValue, JsValue> {
+    let listing = Listing::from_bytes(osu_buffer).map_err(|e| JsValue::from(e.to_string()))?;
     let mut beatmap_map: HashMap<String, osu_db::listing::Beatmap> = HashMap::with_capacity(listing.beatmaps.len());
 
     for beatmap in listing.beatmaps {
@@ -19,7 +19,7 @@ pub fn get_beatmaps(osu_buffer: &[u8], scores_buffer: &[u8]) -> JsValue {
         }
     }
 
-    let score_list = ScoreList::from_bytes(scores_buffer).unwrap_throw();
+    let score_list = ScoreList::from_bytes(scores_buffer).map_err(|e| JsValue::from(e.to_string()))?;
     let mut results: HashMap<String, ResultEntry> = HashMap::with_capacity(score_list.beatmaps.len());
     
     for beatmap_scores_entry in score_list.beatmaps {
@@ -43,21 +43,23 @@ pub fn get_beatmaps(osu_buffer: &[u8], scores_buffer: &[u8]) -> JsValue {
         results.insert(hash, result_entry);
     }
 
-    JsValue::from_serde(&results).unwrap_throw()
+    JsValue::from_serde(&results).map_err(|e| JsValue::from(e.to_string()))
 }
 
 #[wasm_bindgen(js_name="calculatePp")]
-pub fn calculate_pp(gamemode: u8, scores: &JsValue, map_buffer: &[u8]) -> Vec<JsValue> {
-    let beatmap = Beatmap::parse(map_buffer).unwrap_throw();
-    let parsed_scores: Vec<Score> = JsValue::into_serde(scores).unwrap_throw();
+pub fn calculate_pp(gamemode: u8, scores: &JsValue, map_buffer: &[u8]) -> Result<Vec<JsValue>, JsValue> {
+    let beatmap = Beatmap::parse(map_buffer).map_err(|e| JsValue::from(e.to_string()))?;
+    let parsed_scores: Vec<Score> = JsValue::into_serde(scores).map_err(|e| JsValue::from(e.to_string()))?;
     let mut mod_map: HashMap<u32, PerformanceAttributes> = HashMap::new();
 
-    parsed_scores
+    Ok(parsed_scores
         .into_iter()
         .map(|score| {
             // TODO CONVERTS
             if score.gamemode != gamemode {
-                return JsValue::from_serde(&PpOutput::default()).unwrap_throw();
+                return JsValue::from_serde(&PpOutput::default())
+                    .map_err(|e| JsValue::from(e.to_string()))
+                    .unwrap_throw();
             }
 
             let max_attributes = match mod_map.get(&score.mods) {
@@ -91,6 +93,6 @@ pub fn calculate_pp(gamemode: u8, scores: &JsValue, map_buffer: &[u8]) -> Vec<Js
                 max_combo
             };
 
-            JsValue::from_serde(&result).unwrap_throw()
-        }).collect()
+            JsValue::from_serde(&result).map_err(|e| JsValue::from(e.to_string())).unwrap_throw()
+        }).collect())
 }

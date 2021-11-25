@@ -6,7 +6,7 @@ Process local replays and present them in a filterable way
 
 - Filter, search & sort many different fields
 - PP values & max combo
-- Auto refreshes when you set a score in osu! (may take 2-3 min)
+- Auto refreshes when you set a score in osu! (every 10~ min)
 
 ## Download
 https://github.com/Yentis/osu-local-scores/releases

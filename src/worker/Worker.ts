@@ -281,15 +281,16 @@ const PP_CHUNK = 100
 async function calculateAllPpValues (osuPath: string) {
   if (!beatmaps) return
   let i, j, temporary
-  const promises: Promise<void>[] = []
   const beatmapList = Object.values(beatmaps)
+
+  const workerData: WorkerData = { id: 'pp-progress', func: WorkerFunc.BATCH_CALCULATE_PP, args: 0 }
+  postMessage(workerData)
 
   for (i = 0, j = beatmapList.length; i < j; i += PP_CHUNK) {
     temporary = beatmapList.slice(i, i + PP_CHUNK)
-    promises.push(calculatePpValues(osuPath, temporary))
+    await calculatePpValues(osuPath, temporary)
   }
 
-  await Promise.all(promises)
   calculatedCount = 0
 }
 
@@ -313,7 +314,7 @@ async function calculatePpValues (osuPath: string, beatmaps: DatabaseResponse[])
   }
 
   const { buffers, errors } = await getFileBuffers(pathMap)
-  if (errors) console.error(errors)
+  if (errors.length > 0) console.error(errors)
 
   batchCalculatePp(buffers)
 }

@@ -1,6 +1,6 @@
 {
   "name": "osu-local-scores",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Process local replays and present them in a filterable way",
   "productName": "osu! Score Overview",
   "author": "Yentis#5218",
@@ -12,17 +12,15 @@
     "build::wasm": "cd src-wasm && cargo clippy && wasm-pack build",
     "build::electron": "quasar build -m electron"
   },
-  "dependencies": {
-    "@quasar/extras": "^1.0.0",
-    "core-js": "^3.6.5",
-    "quasar": "^2.0.0"
-  },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
     "@quasar/app": "^3.0.0",
+    "@quasar/extras": "^1.0.0",
+    "@types/graceful-fs": "^4.1.5",
     "@types/node": "^12.20.21",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
+    "core-js": "^3.6.5",
     "electron": "^16.0.1",
     "electron-packager": "^15.2.0",
     "eslint": "^7.14.0",
@@ -30,7 +28,9 @@
     "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^5.1.0",
-    "eslint-plugin-vue": "^7.0.0"
+    "eslint-plugin-vue": "^7.0.0",
+    "graceful-fs": "^4.2.8",
+    "quasar": "^2.0.0"
   },
   "browserslist": [
     "last 10 Chrome versions",

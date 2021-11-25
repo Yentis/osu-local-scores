@@ -1,8 +1,8 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, OpenDialogReturnValue, protocol, ProtocolRequest, ProtocolResponse } from 'electron'
 import path from 'path'
 import os from 'os'
-import fs, { FSWatcher } from 'fs'
 import { FileBufferResult } from 'src/interfaces/ElectronWindow'
+import fs, { FSWatcher } from 'graceful-fs'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()

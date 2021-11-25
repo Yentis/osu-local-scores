@@ -2,29 +2,27 @@ export default interface Filter {
   search: string
   status: number[]
   gamemode: number[]
-  scoreMin?: number
-  scoreMax?: number
+  scoreMin?: number | string
+  scoreMax?: number | string
   grade: number[]
-  accuracyMin?: number
-  accuracyMax?: number
-  missesMin?: number
-  missesMax?: number
-  comboMin?: number
-  comboMax?: number
-  altComboMin?: number
-  altComboMax?: number
-  maxComboMin?: number
-  maxComboMax?: number
-  comboType: number
+  accuracyMin?: number | string
+  accuracyMax?: number | string
+  missesMin?: number | string
+  missesMax?: number | string
+  comboMin?: number | string
+  comboMax?: number | string
+  altComboMin?: number | string
+  altComboMax?: number | string
+  maxComboMin?: number | string
+  maxComboMax?: number | string
   mods: Map<number, boolean | null>
   dateMin?: string
   dateMax?: string
-  ppMin?: number
-  ppMax?: number
-  altPpMin?: number
-  altPpMax?: number
-  maxPpMin?: number
-  maxPpMax?: number
-  ppType: number
+  ppMin?: number | string
+  ppMax?: number | string
+  altPpMin?: number | string
+  altPpMax?: number | string
+  maxPpMin?: number | string
+  maxPpMax?: number | string
   highestScorePerMode: boolean
 }

@@ -26,9 +26,7 @@ const filter: Filter = reactive({
   status: Array.from(STATUS.keys()),
   gamemode: MODES.map((_, index) => index),
   grade: GRADES.map((_, index) => index),
-  comboType: 1,
   mods: new Map<number, boolean | null>(),
-  ppType: 1,
   highestScorePerMode: false
 })
 

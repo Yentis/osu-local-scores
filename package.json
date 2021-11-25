@@ -1,6 +1,6 @@
 {
   "name": "osu-local-scores",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Process local replays and present them in a filterable way",
   "productName": "osu! Score Overview",
   "author": "Yentis#5218",

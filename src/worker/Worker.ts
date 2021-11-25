@@ -127,8 +127,8 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
       if (!filter.gamemode.includes(score.gamemode)) return false
 
       // Score
-      const scoreMin = filter.scoreMin || score.score
-      const scoreMax = filter.scoreMax || score.score
+      const scoreMin = filter.scoreMin !== undefined ? filter.scoreMin : score.score
+      const scoreMax = filter.scoreMax !== undefined ? filter.scoreMax : score.score
       if (score.score < scoreMin || score.score > scoreMax) {
         return false
       }
@@ -137,30 +137,30 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
       if (!filter.grade.includes(score.grade)) return false
 
       // Accuracy
-      const accuracyMin = filter.accuracyMin || score.accuracy
-      const accuracyMax = filter.accuracyMax || score.accuracy
+      const accuracyMin = filter.accuracyMin !== undefined ? filter.accuracyMin : score.accuracy
+      const accuracyMax = filter.accuracyMax !== undefined ? filter.accuracyMax : score.accuracy
       if (score.accuracy < accuracyMin || score.accuracy > accuracyMax) {
         return false
       }
 
       // Misses
-      const missesMin = filter.missesMin || score.misses
-      const missesMax = filter.missesMax || score.misses
+      const missesMin = filter.missesMin !== undefined ? filter.missesMin : score.misses
+      const missesMax = filter.missesMax !== undefined ? filter.missesMax : score.misses
       if (score.misses < missesMin || score.misses > missesMax) {
         return false
       }
 
       // Combo
-      const comboMin = filter.comboMin || score.combo
-      const comboMax = filter.comboMax || score.combo
+      const comboMin = filter.comboMin !== undefined ? filter.comboMin : score.combo
+      const comboMax = filter.comboMax !== undefined ? filter.comboMax : score.combo
       if (score.combo < comboMin || score.combo > comboMax) {
         return false
       }
 
       // Max Combo
       const maxCombo = score.maxCombo || 0
-      const maxComboMin = filter.maxComboMin || maxCombo
-      const maxComboMax = filter.maxComboMax || maxCombo
+      const maxComboMin = filter.maxComboMin !== undefined ? filter.maxComboMin : maxCombo
+      const maxComboMax = filter.maxComboMax !== undefined ? filter.maxComboMax : maxCombo
       if (maxCombo < maxComboMin || maxCombo > maxComboMax) {
         return false
       }
@@ -173,8 +173,8 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
         altCombo = maxCombo !== 0 ? ((score.combo / maxCombo) * 100) : 0
       }
 
-      const altComboMin = filter.altComboMin || altCombo
-      const altComboMax = filter.altComboMax || altCombo
+      const altComboMin = filter.altComboMin !== undefined ? filter.altComboMin : altCombo
+      const altComboMax = filter.altComboMax !== undefined ? filter.altComboMax : altCombo
       if (altCombo < altComboMin || altCombo > altComboMax) {
         return false
       }
@@ -224,24 +224,24 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
 
       // PP
       const pp = score.pp || 0
-      const ppMin = filter.ppMin || pp
-      const ppMax = filter.ppMax || pp
+      const ppMin = filter.ppMin !== undefined ? filter.ppMin : pp
+      const ppMax = filter.ppMax !== undefined ? filter.ppMax : pp
       if (pp < ppMin || pp > ppMax) {
         return false
       }
 
       // Max PP
       const maxPp = score.maxPp || 0
-      const maxPpMin = filter.maxPpMin || maxPp
-      const maxPpMax = filter.maxPpMax || maxPp
+      const maxPpMin = filter.maxPpMin !== undefined ? filter.maxPpMin : maxPp
+      const maxPpMax = filter.maxPpMax !== undefined ? filter.maxPpMax : maxPp
       if (maxPp < maxPpMin || maxPp > maxPpMax) {
         return false
       }
 
       // Alt PP
       const altPp = maxPp !== 0 ? ((pp / maxPp) * 100) : 0
-      const altPpMin = filter.altPpMin || altPp
-      const altPpMax = filter.altPpMax || altPp
+      const altPpMin = filter.altPpMin !== undefined ? filter.altPpMin : altPp
+      const altPpMax = filter.altPpMax !== undefined ? filter.altPpMax : altPp
       if (altPp < altPpMin || altPp > altPpMax) {
         return false
       }

@@ -3,7 +3,7 @@
     v-if="visibleColumns.includes('misses')"
     class="text-center"
   >
-    {{ score?.misses !== undefined ? score.misses : '?' }}
+    {{ formatMisses(score?.misses) }}
   </q-td>
 </template>
 
@@ -24,7 +24,16 @@ export default defineComponent({
 
   setup () {
     const { visibleColumns } = SettingsService()
-    return { visibleColumns }
+
+    const formatMisses = (misses?: number) => {
+      if (misses === undefined) return '?'
+      return misses
+    }
+
+    return {
+      visibleColumns,
+      formatMisses
+    }
   }
 })
 </script>

@@ -22,8 +22,8 @@
       <ColumnBody
         :row="props.row"
         :first-score="props.row.scores[0]"
-        :expand="props.expand"
-        @update:expand="props.expand = !props.expand"
+        :expanded="expanded"
+        @update:expand="expand"
       />
     </template>
   </q-table>
@@ -113,40 +113,49 @@ export default defineComponent({
           break
         }
         case COLUMNS.gamemode: {
-          doScoreSort(rows, (score) => score?.gamemode || 0, descending)
+          doScoreSort(rows, (score) => score?.gamemode !== undefined ? score.gamemode : 0, descending)
           break
         }
         case COLUMNS.score: {
-          doScoreSort(rows, (score) => score?.score || 0, descending)
+          doScoreSort(rows, (score) => score?.score !== undefined ? score.score : 0, descending)
           break
         }
         case COLUMNS.grade: {
-          doScoreSort(rows, (score) => score?.grade || 0, descending)
+          doScoreSort(rows, (score) => score?.grade !== undefined ? score.grade : 0, descending)
           break
         }
         case COLUMNS.accuracy: {
-          doScoreSort(rows, (score) => score?.accuracy || 0, descending)
+          doScoreSort(rows, (score) => score?.accuracy !== undefined ? score.accuracy : 0, descending)
           break
         }
         case COLUMNS.misses: {
-          doScoreSort(rows, (score) => score?.misses || 0, descending)
+          doScoreSort(rows, (score) => score?.misses !== undefined ? score.misses : 0, descending)
           break
         }
         case COLUMNS.combo: {
-          doScoreSort(rows, (score) => score?.combo || 0, descending)
+          doScoreSort(rows, (score) => score?.combo !== undefined ? score.combo : 0, descending)
           break
         }
         case COLUMNS.date: {
-          doScoreSort(rows, (score) => score?.date ? new Date(score.date).getTime() : 0, descending)
+          doScoreSort(rows, (score) => score?.date !== undefined ? new Date(score.date).getTime() : 0, descending)
           break
         }
         case COLUMNS.pp: {
-          doScoreSort(rows, (score) => score?.pp || 0, descending)
+          doScoreSort(rows, (score) => score?.pp !== undefined ? score.pp : 0, descending)
           break
         }
       }
 
       return descending ? rows.reverse() : rows
+    }
+
+    const expanded = ref(new Map<number, boolean>())
+    const expand = (key: number) => {
+      const map = expanded.value
+      const isExpanded = map.get(key) === true
+
+      map.set(key, !isExpanded)
+      expanded.value = map
     }
 
     return {
@@ -156,7 +165,9 @@ export default defineComponent({
       filter,
       openURL,
       visibleColumns,
-      doSort
+      doSort,
+      expanded,
+      expand
     }
   }
 })

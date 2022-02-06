@@ -6,7 +6,7 @@
         flat
         dense
         size="sm"
-        :icon="expand ? 'remove' : 'add'"
+        :icon="isExpanded ? 'remove' : 'add'"
         @click="expandRow"
       />
     </q-td>
@@ -90,7 +90,7 @@
 
   <q-tr
     v-for="(score, index) in row.scores"
-    v-show="expand && score !== firstScore"
+    v-show="isExpanded && score !== firstScore"
     :key="`${score.date}${index}`"
   >
     <q-td
@@ -176,8 +176,8 @@ export default defineComponent({
       type: Object as PropType<Score | undefined>,
       required: true
     },
-    expand: {
-      type: Boolean,
+    expanded: {
+      type: Object as PropType<Map<number, boolean>>,
       required: true
     }
   },
@@ -189,17 +189,31 @@ export default defineComponent({
     const platformService = PlatformService()
 
     const getImageSrc = (beatmap: Beatmap) => {
-      return beatmap.filePath
+      return (beatmap.filePath !== undefined && beatmap.filePath.length > 0)
         ? `atom://${osuPath.value}/Songs/${beatmap.filePath}`
         : `https://b.ppy.sh/thumb/${beatmap.beatmapsetId}l.jpg`
     }
 
+    const getExpanded = (key: number) => {
+      return props.expanded.get(key) === true
+    }
+
+    const key = ref(props.row.beatmap.beatmapId)
     const imageSrc = ref(getImageSrc(props.row.beatmap))
-    watch(props, () => { imageSrc.value = getImageSrc(props.row.beatmap) })
+    const isExpanded = ref(getExpanded(key.value))
+
+    watch(props, () => {
+      if (props.row.beatmap.beatmapId !== key.value) {
+        imageSrc.value = getImageSrc(props.row.beatmap)
+      }
+      key.value = props.row.beatmap.beatmapId
+
+      isExpanded.value = getExpanded(key.value)
+    })
 
     const onImageError = (beatmap: Beatmap) => { imageSrc.value = `https://b.ppy.sh/thumb/${beatmap.beatmapsetId}l.jpg` }
     const openURL = (url: string) => { platformService.openURL(url) }
-    const expandRow = () => { context.emit('update:expand') }
+    const expandRow = () => { context.emit('update:expand', props.row.beatmap.beatmapId) }
 
     return {
       visibleColumns,
@@ -208,6 +222,7 @@ export default defineComponent({
       onImageError,
       openURL,
       expandRow,
+      isExpanded,
       STATUS,
       UNSUBMITTED
     }

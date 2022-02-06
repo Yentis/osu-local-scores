@@ -99,7 +99,7 @@ export default defineComponent({
       platformService.openFilePicker(osuPath.value)
         .then((result) => {
           const newOsuPath = result.filePaths[0]
-          if (!newOsuPath) return
+          if (newOsuPath === undefined || newOsuPath.length === 0) return
 
           osuPath.value = newOsuPath
         })

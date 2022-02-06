@@ -4,20 +4,20 @@
     class="text-center"
   >
     <div
-      v-if="score?.pp !== undefined"
+      v-if="isDefined(score?.pp)"
       class="column"
     >
-      <span>{{ +score.pp.toFixed(2) }}</span>
+      <span>{{ formatPp(score?.pp) }}</span>
 
       <span
-        v-if="score.maxPp !== undefined"
+        v-if="isDefined(score?.maxPp)"
         class="top-line"
-      >{{ +score.maxPp.toFixed(2) }}</span>
+      >{{ formatPp(score?.maxPp) }}</span>
 
       <span
-        v-if="score.maxPp !== undefined"
+        v-if="isDefined(score?.maxPp)"
         class="top-line"
-      >{{ score.maxPp !== 0 ? `${+((score.pp / score.maxPp) * 100).toFixed(2)}%` : '∞' }}</span>
+      >{{ formatAltPp(score) }}</span>
     </div>
     <span v-else>?</span>
   </q-td>
@@ -40,7 +40,23 @@ export default defineComponent({
 
   setup () {
     const { visibleColumns } = SettingsService()
-    return { visibleColumns }
+
+    const formatPp = (pp?: number) => {
+      if (pp === undefined) return ''
+      return +pp.toFixed(2)
+    }
+
+    const formatAltPp = (score?: Score) => {
+      if (score?.pp === undefined || score?.maxPp === undefined) return ''
+      return score.maxPp !== 0 ? `${+((score.pp / score.maxPp) * 100).toFixed(2)}%` : '∞'
+    }
+
+    return {
+      visibleColumns,
+      isDefined: (input?: unknown) => input !== undefined,
+      formatPp,
+      formatAltPp
+    }
   }
 })
 </script>

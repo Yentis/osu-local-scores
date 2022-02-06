@@ -7,15 +7,15 @@
       v-if="score"
       class="column"
     >
-      <span>{{ +score.combo.toFixed(2) }}</span>
+      <span>{{ formatCombo(score.combo) }}</span>
 
       <span
-        v-if="score.maxCombo !== undefined"
+        v-if="hasMaxCombo(score)"
         class="top-line"
-      >{{ +score.maxCombo.toFixed(2) }}</span>
+      >{{ formatCombo(score.maxCombo) }}</span>
 
       <span
-        v-if="MODES[score.gamemode] === MANIA || score.maxCombo !== undefined"
+        v-if="MODES[score.gamemode] === MANIA || hasMaxCombo(score)"
         class="top-line"
       >{{ formatAltCombo(score) }}</span>
     </div>
@@ -41,6 +41,11 @@ export default defineComponent({
   setup () {
     const { visibleColumns } = SettingsService()
 
+    const formatCombo = (combo?: number) => {
+      if (combo === undefined) return ''
+      return +combo.toFixed(2)
+    }
+
     const formatAltCombo = (score: Score) => {
       if (MODES[score.gamemode] === MANIA) {
         const altCombo = score.count300 !== 0 ? +(score.countGeki / score.count300).toFixed(2) : '∞'
@@ -55,7 +60,9 @@ export default defineComponent({
       visibleColumns,
       MODES,
       MANIA,
-      formatAltCombo
+      formatCombo,
+      formatAltCombo,
+      hasMaxCombo: (score: Score) => score.maxCombo !== undefined
     }
   }
 })

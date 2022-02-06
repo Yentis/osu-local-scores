@@ -17,8 +17,8 @@ https://github.com/Yentis/osu-local-scores/releases
 ## Building
 ```bash
 yarn install
-yarn dev::electron
-yarn build::electron
+yarn dev:electron
+yarn build:electron
 ```
 
 After building you will need to do the following steps (suggestions welcome):

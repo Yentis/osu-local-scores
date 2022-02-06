@@ -158,7 +158,7 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
       }
 
       // Max Combo
-      const maxCombo = score.maxCombo || 0
+      const maxCombo = score.maxCombo !== undefined ? score.maxCombo : 0
       const maxComboMin = typeof filter.maxComboMin === 'number' ? filter.maxComboMin : maxCombo
       const maxComboMax = typeof filter.maxComboMax === 'number' ? filter.maxComboMax : maxCombo
       if (maxCombo < maxComboMin || maxCombo > maxComboMax) {
@@ -216,14 +216,14 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
 
       // Date
       const date = new Date(score.date).getTime()
-      const dateMin = filter.dateMin ? new Date(filter.dateMin).getTime() : date
-      const dateMax = filter.dateMax ? new Date(filter.dateMax).getTime() : date
+      const dateMin = filter.dateMin !== undefined ? new Date(filter.dateMin).getTime() : date
+      const dateMax = filter.dateMax !== undefined ? new Date(filter.dateMax).getTime() : date
       if (date < dateMin || date > dateMax) {
         return false
       }
 
       // PP
-      const pp = score.pp || 0
+      const pp = score.pp !== undefined ? score.pp : 0
       const ppMin = typeof filter.ppMin === 'number' ? filter.ppMin : pp
       const ppMax = typeof filter.ppMax === 'number' ? filter.ppMax : pp
       if (pp < ppMin || pp > ppMax) {
@@ -231,7 +231,7 @@ function filterBeatmaps (filter: Filter): DatabaseResponse[] {
       }
 
       // Max PP
-      const maxPp = score.maxPp || 0
+      const maxPp = score.maxPp !== undefined ? score.maxPp : 0
       const maxPpMin = typeof filter.maxPpMin === 'number' ? filter.maxPpMin : maxPp
       const maxPpMax = typeof filter.maxPpMax === 'number' ? filter.maxPpMax : maxPp
       if (maxPp < maxPpMin || maxPp > maxPpMax) {
@@ -305,7 +305,7 @@ async function calculatePpValues (osuPath: string, beatmaps: DatabaseResponse[])
     }
 
     const filePath = beatmap.beatmap.filePath
-    if (!filePath) {
+    if (filePath === undefined || filePath.length === 0) {
       continue
     }
 

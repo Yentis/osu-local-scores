@@ -28,7 +28,7 @@ export class UpdateService {
     if (update) { this.showUpdateAvailable(update) }
 
     const changelog = await this.getChangelog()
-    if (!changelog) return
+    if (changelog === undefined) return
 
     Dialog.create({
       component: ConfirmationDialog,
@@ -48,8 +48,9 @@ export class UpdateService {
     return githubReleases
   }
 
-  private getVersion () {
-    return LocalStorage.getItem(VERSION) || ''
+  private getVersion (): string {
+    const version = LocalStorage.getItem(VERSION)
+    return typeof version === 'string' ? version : ''
   }
 
   private async getChangelog (): Promise<string | undefined> {
